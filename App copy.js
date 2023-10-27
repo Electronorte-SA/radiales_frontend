@@ -27,9 +27,11 @@ export default function App() {
   
   const [token, setToken] = useState(null);
   const db = SQLite.openDatabase('dbradiales.db');
+  // const apiUrl = 'http://www.ensa.com.pe:8074/benetton_api/Login';
+  // const apiKey = "3b3fca8e-fefe-4a9a-a1df-4dbee1e426ad"; // Código a enviar en el cuerpo de la solicitud
+  // const apiUrl = 'http://127.0.0.1:5000/qr/token';
+  // const apiKey = "mama" // Código a enviar en el cuerpo de la solicitud
 
-  const apiUrl = 'http://10.112.47.55:5000/qr/token';
-  const apiKey = "mama"// Código a enviar en el cuerpo de la solicitud
 
   //CAMARAAAAAAAAAAA
   useEffect(() => {
@@ -60,15 +62,9 @@ export default function App() {
           'Longitud REAL, ' +
           'Unionn TEXT)'
       );
-      
-      tx.executeSql(
-        'CREATE TABLE IF NOT EXISTS parametrosqr (' +
-          'ultima_actualizacion DATETIME' +
-        ')'
-      );
-
       contar();    
-
+      
+      
   
     });
 
@@ -91,116 +87,49 @@ export default function App() {
 
   }
 
+
+const apiUrl = 'http://10.112.47.55:5000/qr/token';
+const apiKey = {"idapp": "mama"}// Código a enviar en el cuerpo de la solicitud
 // const handleSync = () => {
-//   const timestamp = new Date().toLocaleString();
-//   console.log('Marca de tiempo al hacer clic en el botón:', timestamp);
+//   axios.post(apiUrl, apiKey)
+//   .then((response) => {
+//     const generatedToken = response.data.token;
+//     console.log('Token generado:', generatedToken);
+//   })
+//   .catch((error) => {
+//     console.error('Error al obtener el token:', error);
+//   });
 
-//   axios.post(apiUrl, { "idapp": apiKey })
-//     .then((response) => {
-//       const generatedToken = response.data.token;
-//       console.log('los token', generatedToken)
-
-//       const otherApiUrl = 'http://10.112.47.55:5000/qr/radialesqr';
-//       axios.get(otherApiUrl, {
-//         headers: {
-//           Authorization: `Bearer ${generatedToken}`,
-//         },
-//       })
-      
-//         .then((otherApiResponse) => {
-//           const dataToInsert = otherApiResponse.data.datos;
-//           const batchSize = 10;
-//           const batches = [];
-//           for (let i = 0; i < dataToInsert.length; i += batchSize) {
-//             batches.push(dataToInsert.slice(i, i + batchSize));
-//           }
-            
-//           let dataCount = 0;
-
-//           const insertPromises = batches.map((batch) => {
-//             return new Promise((resolve, reject) => {
-//               db.transaction((tx) => {
-//                 batch.forEach((item) => {
-//                   tx.executeSql(
-//                     'INSERT INTO radialesQR (Id, Estado, Tipo_de_red, T_Nominal, Nombre, Alias, Tipo_de_propietario, Nombre_del_propietario, Estilo_de_subcodigo, Montaje, Swit_Installation_Date, Descripcion_Optimus, UTMEste, UTMNorte, ID_de_circuito_ConcatSet, Alias_ConcatSet, Latitud, Longitud, Unionn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-//                     [
-//                       parseInt(item.id, 10),
-//                       item.estado,
-//                       item.tipo_de_red,
-//                       item.t_Nominal,
-//                       item.nombre,
-//                       item.alias,
-//                       item.tipo_de_propietario,
-//                       item.nombre_del_propietario,
-//                       item.estilo_de_subcodigo,
-//                       item.montaje,
-//                       item.swit_Installation_Date,
-//                       item.descripcion_Optimus,
-//                       item.utmEste,
-//                       item.utmNorte,
-//                       item.iD_de_circuito_ConcatSet,
-//                       item.alias_ConcatSet,
-//                       item.latitud,
-//                       item.longitud,
-//                       item.unionn,
-//                     ],
-//                     (_, result) => {
-//                     }
-//                   );
-//                 });
-//               },
-//               (txError) => {
-//                 reject(txError);
-//               },
-//               () => {
-//                 resolve();
-//               });
-//             });
-//           });
-//           Promise.all(insertPromises)
-//             .then(() => {
-//               console.log('Inserción de datos completa');
-//             })
-//             .catch((error) => {
-//               console.error('Error al insertar datos:', error);
-//             });
-//           contar();
-//         })
-//         .catch((error) => {
-//           console.error('Error al obtener datos de la otra API:', error);
-//         });
-//     })
-//     .catch((error) => {
-//       console.error('Error al obtener el token:', error);
-//     });
 // }
 
-////////////////////////////////////////////////////
-
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 const handleSync = () => {
+  // 1. Agregar marca de tiempo (fecha y hora actual)
   const timestamp = new Date().toLocaleString();
   console.log('Marca de tiempo al hacer clic en el botón:', timestamp);
 
-  axios.post(apiUrl, { "idapp": apiKey })
+  axios.post(apiUrl,  apiKey)
     .then((response) => {
       const generatedToken = response.data.token;
       console.log('los token', generatedToken)
-
-      const otherApiUrl = 'http://10.112.47.55:5000/qr/radialesqr';
+      // const otherApiUrl = 'http://www.ensa.com.pe:8074/benetton_api/radialesQR/listar';
+      const otherApiUrl = 'http://10.112.47.55:5000/qr/radialesqrl';
       axios.get(otherApiUrl, {
         headers: {
           Authorization: `Bearer ${generatedToken}`,
         },
       })
-      
         .then((otherApiResponse) => {
-          const dataToInsert = otherApiResponse.data.datos;
+          const dataToInsert = otherApiResponse.data;
+
+          // Divide los datos en lotes más pequeños (por ejemplo, lotes de 100 elementos)
           const batchSize = 10;
           const batches = [];
           for (let i = 0; i < dataToInsert.length; i += batchSize) {
             batches.push(dataToInsert.slice(i, i + batchSize));
           }
-            
+
+          // Utiliza Promise.all para insertar los lotes de datos en paralelo
           let dataCount = 0;
 
           const insertPromises = batches.map((batch) => {
@@ -231,6 +160,7 @@ const handleSync = () => {
                       item.unionn,
                     ],
                     (_, result) => {
+                      // Registro insertado con ID
                     }
                   );
                 });
@@ -243,6 +173,8 @@ const handleSync = () => {
               });
             });
           });
+
+          // Ejecuta todas las promesas de inserción en paralelo
           Promise.all(insertPromises)
             .then(() => {
               console.log('Inserción de datos completa');
@@ -260,6 +192,8 @@ const handleSync = () => {
       console.error('Error al obtener el token:', error);
     });
 }
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

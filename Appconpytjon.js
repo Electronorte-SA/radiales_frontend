@@ -60,14 +60,14 @@ export default function App() {
           'Longitud REAL, ' +
           'Unionn TEXT)'
       );
-      
+
       tx.executeSql(
         'CREATE TABLE IF NOT EXISTS parametrosqr (' +
           'ultima_actualizacion DATETIME' +
         ')'
       );
-
       contar();    
+      
 
   
     });
@@ -91,93 +91,8 @@ export default function App() {
 
   }
 
-// const handleSync = () => {
-//   const timestamp = new Date().toLocaleString();
-//   console.log('Marca de tiempo al hacer clic en el botón:', timestamp);
-
-//   axios.post(apiUrl, { "idapp": apiKey })
-//     .then((response) => {
-//       const generatedToken = response.data.token;
-//       console.log('los token', generatedToken)
-
-//       const otherApiUrl = 'http://10.112.47.55:5000/qr/radialesqr';
-//       axios.get(otherApiUrl, {
-//         headers: {
-//           Authorization: `Bearer ${generatedToken}`,
-//         },
-//       })
-      
-//         .then((otherApiResponse) => {
-//           const dataToInsert = otherApiResponse.data.datos;
-//           const batchSize = 10;
-//           const batches = [];
-//           for (let i = 0; i < dataToInsert.length; i += batchSize) {
-//             batches.push(dataToInsert.slice(i, i + batchSize));
-//           }
-            
-//           let dataCount = 0;
-
-//           const insertPromises = batches.map((batch) => {
-//             return new Promise((resolve, reject) => {
-//               db.transaction((tx) => {
-//                 batch.forEach((item) => {
-//                   tx.executeSql(
-//                     'INSERT INTO radialesQR (Id, Estado, Tipo_de_red, T_Nominal, Nombre, Alias, Tipo_de_propietario, Nombre_del_propietario, Estilo_de_subcodigo, Montaje, Swit_Installation_Date, Descripcion_Optimus, UTMEste, UTMNorte, ID_de_circuito_ConcatSet, Alias_ConcatSet, Latitud, Longitud, Unionn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-//                     [
-//                       parseInt(item.id, 10),
-//                       item.estado,
-//                       item.tipo_de_red,
-//                       item.t_Nominal,
-//                       item.nombre,
-//                       item.alias,
-//                       item.tipo_de_propietario,
-//                       item.nombre_del_propietario,
-//                       item.estilo_de_subcodigo,
-//                       item.montaje,
-//                       item.swit_Installation_Date,
-//                       item.descripcion_Optimus,
-//                       item.utmEste,
-//                       item.utmNorte,
-//                       item.iD_de_circuito_ConcatSet,
-//                       item.alias_ConcatSet,
-//                       item.latitud,
-//                       item.longitud,
-//                       item.unionn,
-//                     ],
-//                     (_, result) => {
-//                     }
-//                   );
-//                 });
-//               },
-//               (txError) => {
-//                 reject(txError);
-//               },
-//               () => {
-//                 resolve();
-//               });
-//             });
-//           });
-//           Promise.all(insertPromises)
-//             .then(() => {
-//               console.log('Inserción de datos completa');
-//             })
-//             .catch((error) => {
-//               console.error('Error al insertar datos:', error);
-//             });
-//           contar();
-//         })
-//         .catch((error) => {
-//           console.error('Error al obtener datos de la otra API:', error);
-//         });
-//     })
-//     .catch((error) => {
-//       console.error('Error al obtener el token:', error);
-//     });
-// }
-
-////////////////////////////////////////////////////
-
 const handleSync = () => {
+  // 1. Agregar marca de tiempo (fecha y hora actual)
   const timestamp = new Date().toLocaleString();
   console.log('Marca de tiempo al hacer clic en el botón:', timestamp);
 
@@ -194,15 +109,15 @@ const handleSync = () => {
       })
       
         .then((otherApiResponse) => {
+          // console.log('ingreso al get')
           const dataToInsert = otherApiResponse.data.datos;
+          // Divide los datos en lotes más pequeños (por ejemplo, lotes de 100 elementos)
           const batchSize = 10;
           const batches = [];
           for (let i = 0; i < dataToInsert.length; i += batchSize) {
             batches.push(dataToInsert.slice(i, i + batchSize));
           }
             
-          let dataCount = 0;
-
           const insertPromises = batches.map((batch) => {
             return new Promise((resolve, reject) => {
               db.transaction((tx) => {
@@ -259,7 +174,9 @@ const handleSync = () => {
     .catch((error) => {
       console.error('Error al obtener el token:', error);
     });
-}
+
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
