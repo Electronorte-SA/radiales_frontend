@@ -27,11 +27,9 @@ export default function App() {
   
   const [token, setToken] = useState(null);
   const db = SQLite.openDatabase('dbradiales.db');
-  // const apiUrl = 'http://www.ensa.com.pe:8074/benetton_api/Login';
-  // const apiKey = "3b3fca8e-fefe-4a9a-a1df-4dbee1e426ad"; // Código a enviar en el cuerpo de la solicitud
-  // const apiUrl = 'http://127.0.0.1:5000/qr/token';
-  // const apiKey = "mama" // Código a enviar en el cuerpo de la solicitud
 
+  const apiUrl = 'http://10.112.47.55:5000/qr/token';
+  const apiKey = "mama"// Código a enviar en el cuerpo de la solicitud
 
   //CAMARAAAAAAAAAAA
   useEffect(() => {
@@ -62,9 +60,67 @@ export default function App() {
           'Longitud REAL, ' +
           'Unionn TEXT)'
       );
+      db.transaction((tx) => {
+        // tx.executeSql(
+        //   'DROP TABLE parametrosqr'
+        // );
+        
+        tx.executeSql(
+          'CREATE TABLE IF NOT EXISTS parametrosqr (' +
+            'NOMBRE TEXT,' +
+            'VALOR TEXT' +
+          ')'
+        ); 
+
+      tx.executeSql(
+        'SELECT * FROM parametrosqr WHERE nombre=?',
+        ['ULT_ACT'],
+        (_, { rows }) => {
+          console.log('las consultas de select de la fecha',rows)
+          if (rows.length > 0) {
+            tx.executeSql(
+              'INSERT INTO parametrosqr (NOMBRE, VALOR) VALUES (?, ?)',
+              ['ULT_ACT',''],
+              (_, result) => {
+                console.log('Registro insertado con éxito en la tabla parametrosqr');
+              },
+              (_, error) => {
+                console.error('Error al insertar el registro en la tabla parametrosqr:', error);
+              }
+            );   
+          }
+          
+        },
+        (_, error) => {
+          console.error('error', error)
+        }
+      );
+      
+      
+    });
+    
+
+
+      tx.executeSql(
+        'SELECT * FROM parametrosqr',
+        [],
+        (_, result) => {
+          console.log('los datos de la consulta',result)
+          const rows = result.rows;
+          for (let i = 0; i < rows.length; i++) {
+            const item = rows.item(i);
+            console.log('Fila', i + 1, ':', item);
+            console.log('NOMBRE:', item.NOMBRE, 'VALOR:', item.VALOR);
+          }
+        },
+        (_, error) => {
+          console.error('Error al obtener los datos de la tabla parametrosqr:', error);
+        }
+      );
+      
+      
       contar();    
-      
-      
+
   
     });
 
@@ -87,112 +143,301 @@ export default function App() {
 
   }
 
+// ****************************************************************************************************
 
-const apiUrl = 'http://10.112.47.55:5000/qr/token';
-const apiKey = {"idapp": "mama"}// Código a enviar en el cuerpo de la solicitud
-// const handleSync = () => {
-//   axios.post(apiUrl, apiKey)
-//   .then((response) => {
-//     const generatedToken = response.data.token;
-//     console.log('Token generado:', generatedToken);
-//   })
-//   .catch((error) => {
-//     console.error('Error al obtener el token:', error);
-//   });
 
-// }
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-const handleSync = () => {
-  // 1. Agregar marca de tiempo (fecha y hora actual)
-  const timestamp = new Date().toLocaleString();
-  console.log('Marca de tiempo al hacer clic en el botón:', timestamp);
-
-  axios.post(apiUrl,  apiKey)
-    .then((response) => {
-      const generatedToken = response.data.token;
-      console.log('los token', generatedToken)
-      // const otherApiUrl = 'http://www.ensa.com.pe:8074/benetton_api/radialesQR/listar';
-      const otherApiUrl = 'http://10.112.47.55:5000/qr/radialesqrl';
-      axios.get(otherApiUrl, {
-        headers: {
-          Authorization: `Bearer ${generatedToken}`,
-        },
-      })
-        .then((otherApiResponse) => {
-          const dataToInsert = otherApiResponse.data;
-
-          // Divide los datos en lotes más pequeños (por ejemplo, lotes de 100 elementos)
-          const batchSize = 10;
-          const batches = [];
-          for (let i = 0; i < dataToInsert.length; i += batchSize) {
-            batches.push(dataToInsert.slice(i, i + batchSize));
+const selectFromParametrosqr = () => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM parametrosqr WHERE nombre=?',
+        ['ULT_ACT'],
+        (_, { rows }) => {
+          console.log('las consultas de select de la fecha',rows)
+          if (rows.length > 0) {
+            const item = rows.item(0);
+            resolve(item.VALOR);
+          }else{
+            resolve(null)
           }
+          
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+};
 
-          // Utiliza Promise.all para insertar los lotes de datos en paralelo
-          let dataCount = 0;
+const fetchToken = () => {
+  return new Promise((resolve, reject) => {
+    axios.post(apiUrl, { "idapp": apiKey })
+      .then((response) => {
+        const generatedToken = response.data.token;
+        console.log('los token',generatedToken)
+        resolve(generatedToken);
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+};
 
-          const insertPromises = batches.map((batch) => {
-            return new Promise((resolve, reject) => {
-              db.transaction((tx) => {
-                batch.forEach((item) => {
-                  tx.executeSql(
-                    'INSERT INTO radialesQR (Id, Estado, Tipo_de_red, T_Nominal, Nombre, Alias, Tipo_de_propietario, Nombre_del_propietario, Estilo_de_subcodigo, Montaje, Swit_Installation_Date, Descripcion_Optimus, UTMEste, UTMNorte, ID_de_circuito_ConcatSet, Alias_ConcatSet, Latitud, Longitud, Unionn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                    [
-                      parseInt(item.id, 10),
-                      item.estado,
-                      item.tipo_de_red,
-                      item.t_Nominal,
-                      item.nombre,
-                      item.alias,
-                      item.tipo_de_propietario,
-                      item.nombre_del_propietario,
-                      item.estilo_de_subcodigo,
-                      item.montaje,
-                      item.swit_Installation_Date,
-                      item.descripcion_Optimus,
-                      item.utmEste,
-                      item.utmNorte,
-                      item.iD_de_circuito_ConcatSet,
-                      item.alias_ConcatSet,
-                      item.latitud,
-                      item.longitud,
-                      item.unionn,
-                    ],
-                    (_, result) => {
-                      // Registro insertado con ID
-                    }
-                  );
-                });
+const fetchDataFromOtherAPI = (generatedToken, fecha_busqueda) => {
+  return new Promise((resolve, reject) => {
+    const otherApiUrl = `http://10.112.47.55:5000/qr/radialesqr?fecha_busqueda=${fecha_busqueda}`;
+    axios.get(otherApiUrl, {
+      headers: {
+        Authorization: `Bearer ${generatedToken}`,
+      },
+    })
+    
+    .then((otherApiResponse) => {
+      const dataFromAPI = otherApiResponse.data;
+      // console.log('LOS DATOS DE LA APIS:', dataFromAPI.radiales)
+      resolve(otherApiResponse.data);
+    })
+    .catch((error) => {
+      reject(error);
+    });
+  });
+};
+
+const actualizarFechaEnParametrosQR = (fecha) => {
+  return new Promise((resolve, reject) => {
+    console.log('Fecha a actualizar:', fecha);
+    db.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE parametrosqr SET VALOR=? WHERE NOMBRE=?',
+        [fecha, 'ULT_ACT'],
+        (_, result) => {
+          console.log('Resultado de la actualización:', result);
+          console.log('Fecha actualizada con éxito en la tabla parametrosqr:', fecha);
+          resolve('Éxito al actualizar la fecha');
+        },
+        (_, error) => {
+          console.error('Error al actualizar la fecha en la tabla parametrosqr:', error);
+          reject('Error al actualizar la fecha');
+        }
+      );
+    });
+  });
+};
+ 
+  //////////// PARA INSERARRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR//////////////////////////////////////////////////////////////
+  const insertRadiales= (data) => {
+    // console.log('los datos de la funcion insert BatchIntoDB en inserta',data) //si lllega
+
+    return new Promise((resolve, reject) => {
+      const batchSize = 10;
+      const batches = [];
+      for (let i = 0; i < data.length; i += batchSize) {
+        batches.push(data.slice(i, i + batchSize));
+      }
+      console.log('los datos en batche',batches) //si lllega
+
+  
+      const insertPromises = batches.map((batch) => {
+        return new Promise((resolve, reject) => {
+          db.transaction((tx) => {
+            batch.forEach((item) => {
+              tx.executeSql(
+                'INSERT INTO radialesQR (Id, Estado, Tipo_de_red, T_Nominal, Nombre, Alias, Tipo_de_propietario, Nombre_del_propietario, Estilo_de_subcodigo, Montaje, Swit_Installation_Date, Descripcion_Optimus, UTMEste, UTMNorte, ID_de_circuito_ConcatSet, Alias_ConcatSet, Latitud, Longitud, Unionn) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [
+                  parseInt(item.id, 10),
+                  item.estado,
+                  item.tipo_de_red,
+                  item.t_Nominal,
+                  item.nombre,
+                  item.alias,
+                  item.tipo_de_propietario,
+                  item.nombre_del_propietario,
+                  item.estilo_de_subcodigo,
+                  item.montaje,
+                  item.swit_Installation_Date,
+                  item.descripcion_Optimus,
+                  item.utmEste,
+                  item.utmNorte,
+                  item.iD_de_circuito_ConcatSet,
+                  item.alias_ConcatSet,
+                  item.latitud,
+                  item.longitud,
+                  item.unionn,
+                ],
+                (_, result) => {
+                }
+              );
+            });
+          }, (txError) => {
+            reject(txError);
+          }, () => {
+            resolve(true);
+          });
+        });
+      });
+  
+      Promise.all(insertPromises)
+        .then(() => {
+          resolve('Inserción de datos completa');
+        })
+        .catch((error) => {
+          reject(`Error al insertar datos: ${error}`);
+        });
+    });
+  };
+
+////////////////// PARA ACTUALIZARRRRRRRRRRRRRRRRRRRRRRRR////////////////////////////////////////
+  
+const updateRadiales = (data) => {
+  
+  console.log('los datos de actualizar',data)
+  return new Promise((resolve, reject) => {
+    const batchSize = 10;
+    const batches = [];
+    for (let i = 0; i < data.length; i += batchSize) {
+      batches.push(data.slice(i, i + batchSize));
+    }
+          // console.log('los datos de actualizar',batches)
+    const updatePromises = batches.map((batch) => {
+      return new Promise((resolve, reject) => {
+        db.transaction((tx) => {
+          batch.forEach((item) => {
+            tx.executeSql(
+              'UPDATE radialesQR SET Estado = ?, Tipo_de_red = ?, T_Nominal = ?, Nombre = ?, Alias = ?, Tipo_de_propietario = ?, Nombre_del_propietario = ?, Estilo_de_subcodigo = ?, Montaje = ?, Swit_Installation_Date = ?, Descripcion_Optimus = ?, UTMEste = ?, UTMNorte = ?, ID_de_circuito_ConcatSet = ?, Alias_ConcatSet = ?, Latitud = ?, Longitud = ?, Unionn = ? WHERE Id = ?',
+              [
+                item.estado,
+                item.tipo_de_red,
+                item.t_Nominal,
+                item.nombre,
+                item.alias,
+                item.tipo_de_propietario,
+                item.nombre_del_propietario,
+                item.estilo_de_subcodigo,
+                item.montaje,
+                item.swit_Installation_Date,
+                item.descripcion_Optimus,
+                item.utmEste,
+                item.utmNorte,
+                item.iD_de_circuito_ConcatSet,
+                item.alias_ConcatSet,
+                item.latitud,
+                item.longitud,
+                item.unionn,
+                parseInt(item.id, 10)
+              ],
+              (_, result) => {
+                // Registro actualizado con ID
               },
               (txError) => {
                 reject(txError);
-              },
-              () => {
-                resolve();
-              });
-            });
+              }
+            );
           });
-
-          // Ejecuta todas las promesas de inserción en paralelo
-          Promise.all(insertPromises)
-            .then(() => {
-              console.log('Inserción de datos completa');
-            })
-            .catch((error) => {
-              console.error('Error al insertar datos:', error);
-            });
-          contar();
-        })
-        .catch((error) => {
-          console.error('Error al obtener datos de la otra API:', error);
+        }, (txError) => {
+          reject(txError);
+        }, () => {
+          resolve();
         });
-    })
-    .catch((error) => {
-      console.error('Error al obtener el token:', error);
+      });
     });
-}
 
+    Promise.all(updatePromises)
+      .then(() => {
+        resolve('Actualización de datos completa');
+      })
+      .catch((error) => {
+        reject(`Error al actualizar datos: ${error}`);
+      });
+  });
+};
+
+
+////////////////////////////////////////////////////
+const handleSync = async () => {
+    try{
+      
+      
+      //  let exito_insertar = await insertBatchIntoDB(data);
+      // let fecha_busqueda = await selectFromParametrosqr(); 
+      // let fecha_busqueda = '2023-10-24 8:30:00';
+
+      let fecha_busqueda = '';   
+      // // const fecha_busqueda = null;     
+      console.log('la fecha actualizada busqueda',fecha_busqueda)
+      let generatedToken = await fetchToken();
+      // console.log('vhbjnkl',generatedToken)
+      let data = await fetchDataFromOtherAPI(generatedToken,fecha_busqueda);
+      // // console.log('todos mm los datos data.radiales',data.radiales)
+      if (data){
+        console.log('paso 1')
+        if (fecha_busqueda === '') {
+          console.log('paso 2')
+          if (data.radiales){
+            console.log('paso 3')
+          let exito_insertar = await insertRadiales(data.radiales);
+          console.log('los datos mm de boton en insertado',exito_insertar)
+  
+          }  
+        }else{ 
+          if (data) { 
+            console.log('paso 4')
+            if(data.radiales){
+              
+            console.log('paso 5')
+              let dataInsertar  = data.radiales.filter((item)=> item.accion = "insertar");
+              
+            console.log('paso 6')
+              let dataActualizar  = data.radiales.filter((item)=> item.accion = "actualizar");
+              
+            console.log('paso 7')
+            if (dataInsertar){
+              let exito_insertar = await insertRadiales(dataInsertar)
+
+              // console.log('datos isertados por la fecha',exito_insertar)
+            }
+            
+            console.log('paso 8')
+              if (dataActualizar){
+
+                let exito_actualizar = await updateRadiales(dataActualizar);
+                console.log('paso 9') 
+                  console.log('datos autilizado por la fecha',exito_actualizar)
+              } 
+              
+
+            }
+          }
+        } 
+      }
+      
+      
+
+
+      let fecha= data.fecha
+  
+      console.log('la fechas de la api',fecha)   
+      if (fecha){
+        let la_fecha_actualida = await actualizarFechaEnParametrosQR(fecha)
+        console.log('la fecha fue actualiz a',la_fecha_actualida)
+        
+      }
+
+      
+
+
+
+
+
+
+
+    }
+    catch(ex){
+      console.error(ex);
+    }
+    // const fecha_busqueda = '2023-10-24 8:30:00'; 
+    
+};
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +471,7 @@ const handleBarCodeScanned = ({ type, data }) => {
       "SELECT * FROM radialesQR",
       [],
       (_, { rows }) => {
-        console.log('ingreso aqui', rows.length)
+        // console.log('ingreso aqui', rows.length)
         if (rows.length > 0) {
           // Si se encuentra el registro, muestra la información.
           const registro = rows.item(0);
