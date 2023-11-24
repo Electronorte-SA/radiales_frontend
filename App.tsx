@@ -22,7 +22,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
 import Home from './pantallas/Home';
-import Perfil from './pantallas/Perfil';
 import Camara from './pantallas/Camara';
 import QRGen from './pantallas/QRGen';
 
@@ -40,7 +39,6 @@ function App(): JSX.Element {
             backgroundColor: '#f4511e',
           },
         }} component={Home} />
-        <Stack.Screen name="Perfil" component={Perfil} />
         <Stack.Screen name="Camara" component={Camara} />
         <Stack.Screen name="QRGen" component={QRGen} />
       </Stack.Navigator>

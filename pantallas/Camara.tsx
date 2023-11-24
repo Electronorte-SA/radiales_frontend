@@ -1,9 +1,3 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
 
 import React from 'react';
 import {
@@ -24,7 +18,6 @@ import {
 
 import { useEffect, useState } from 'react';
 import { CameraScreen } from 'react-native-camera-kit';
-//import * as RNFS from 'react-native-fs';
 
 function Camara({ navigation }): JSX.Element {
 
