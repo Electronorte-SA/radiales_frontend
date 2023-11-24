@@ -72,7 +72,7 @@ function Home({ navigation }): JSX.Element {
           textShadowOffset:{width: 0, height: 0},
           textShadowRadius:10,
           position: 'absolute'
-        }}>La Mejor Apps</Text>
+        }}>QR - RADIALES </Text>
       <ScrollView style={{
         backgroundColor: 'transparent',
         height: Dimensions.get('window').height,
@@ -109,72 +109,15 @@ function Home({ navigation }): JSX.Element {
             top: -50
           }} source={require('../assets/fondo-home.jpg')}></Image>
 
-            <View style={{flexDirection: 'row'}}>
-            <View style={{margin: 15,
-            alignItems: 'center',
-            alignContent: 'center',
-            justifyContent: 'center',}}>
-              <Image style={{
-                height: 50,
-                width: 50,
-                tintColor: 'white',
-                margin: 10
-              }} source={require('../assets/video.png')}></Image>
-              <Text style={{color:'white'}}>Videos</Text></View>
 
-            <View style={{margin: 15,
-            alignItems: 'center',
-            alignContent: 'center',
-            justifyContent: 'center',}}>
-              <Image style={{
-                height: 50,
-                width: 50,
-                tintColor: 'white',
-                margin: 10
-              }} source={require('../assets/mountain.png')}></Image>
-              <Text style={{color:'white'}}>Montaña</Text></View>
-
-            <View style={{margin: 15,
-            alignItems: 'center',
-            alignContent: 'center',
-            justifyContent: 'center',}}>
-              <Image style={{
-                height: 50,
-                width: 50,
-                tintColor: 'white',
-                margin: 10
-              }} source={require('../assets/dish.png')}></Image>
-              <Text style={{color:'white'}}>Comida</Text></View>
-            </View>
-
-          <Boton text="IR AL PERFIL" onPress={() => navigation.push("Perfil")}></Boton>
-          <Boton text="TOMAR FOTO" onPress={() => {
-            let options = {
-              mediaType: 'photo'
-            }
-            launchCamera(options).then((result) => {
-              console.log(result)
-              const imageRef = storage()
-                .ref("/")
-                .child("fotos");
-
-              imageRef
-                .putFile(result.assets[0].uri)
-                .then(() => {
-                  return imageRef.getDownloadURL();
-                })
-                .then(url => {
-                console.log(url);
-                });
-            })}}></Boton>
             <View style={{
             height: 600,
             backgroundColor: 'transparent'
           }}>
-          <Boton text="CREAR QR" onPress={() => navigation.push("QRGen")}></Boton>
-          <Boton text="LEER QR" onPress={() => {
+          <Boton text="SCAN QR" onPress={() => {
             navigation.push("Camara")
             }}></Boton>
+          <Boton text="BUSCAR ID" onPress={() => navigation.push("QRGen")}></Boton>
             <View style={{
             height: 600,
             backgroundColor: 'transparent'
