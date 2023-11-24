@@ -1,88 +1,63 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-import React from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  TextInput,
-  useColorScheme,
-  View,
-  Dimensions
-} from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import ScanDataScreen from './ScanDataScreen';
 
-import Boton from '../Componentes/Boton';
-
-import QRCode from 'react-native-qrcode-svg';
-
-import { useEffect, useState } from 'react';
-
-function QRGen(): JSX.Element {
-
-    const [texto, setTexto] = useState("");
-    const [mostrarImagen, setMostrarImagen] = useState(false);
-
-    const mostrandoImagen = () =>{
-        if (mostrarImagen && texto) {
-            return (
-            <QRCode
-                value={texto}
-            />
-            )
-        } else {
-            return null;
-        }
-    }
-
-  return (
-    <SafeAreaView style={{
-      backgroundColor: 'black',
-      height: Dimensions.get('window').height,
-      width: Dimensions.get('window').width
-    }}>
-      <Text style={{
-        backgroundColor: 'blue',
-        color: 'white',
-        fontSize: 25
-      }}>Coloque el texto a Codificar:</Text>
-      <TextInput 
-        onChangeText={setTexto}
-        style={{
-        backgroundColor: 'blue',
-        color: 'white',
-        fontSize: 45
-      }}></TextInput>
-
-        <Boton text="CREAR QR" onPress={() => setMostrarImagen(true)}></Boton>
-
-        {mostrandoImagen()}
-      
-    </SafeAreaView>
-  );
+interface QRGenProps {
+  navigation: any;
 }
 
+const QRGen: React.FC<QRGenProps> = ({ navigation }) => {
+  const [showScanDataScreen, setShowScanDataScreen] = useState(false);
+  const [inputID, setInputID] = useState('');
+  const [formData, setFormData] = useState<any>(/* Define la estructura de formData según tus necesidades */);
+
+  const handleSearchButton = () => {
+    // Lógica para buscar por ID
+    // Puedes implementar esta lógica según tus necesidades
+    // Por ejemplo, puedes hacer una llamada a la API para obtener datos basados en el ID ingresado
+  };
+
+  return (
+    <ScrollView contentContainerStyle={styles.containeru}>
+      <View>
+        {!showScanDataScreen ? (
+          <View style={styles.centeredContent}>
+            <Text style={styles.titlem}>Buscar por ID</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Introduce un ID"
+              onChangeText={(text) => setInputID(text)}
+              value={inputID}
+            />
+            <Button title="Buscar" onPress={handleSearchButton} />
+          </View>
+        ) : (
+          <ScanDataScreen formData={formData} setShowScanDataScreen={setShowScanDataScreen} />
+        )}
+      </View>
+    </ScrollView>
+  );
+};
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  containeru: {
+    flexGrow: 1,
+    justifyContent: 'center',
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  centeredContent: {
+    alignItems: 'center',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  titlem: {
+    fontSize: 20,
+    marginBottom: 10,
   },
-  highlight: {
-    fontWeight: '700',
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginBottom: 10,
+    paddingHorizontal: 10,
+    width: '80%', // Puedes ajustar el ancho según tus necesidades
   },
 });
 
