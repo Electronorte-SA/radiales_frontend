@@ -23,7 +23,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import Home from './pantallas/Home';
 import Camara from './pantallas/Camara';
-import QRGen from './pantallas/QRGen';
+import BuscarId from './pantallas/BuscarId';
 
 function App(): JSX.Element {
 
@@ -40,7 +40,7 @@ function App(): JSX.Element {
           },
         }} component={Home} />
         <Stack.Screen name="Camara" component={Camara} />
-        <Stack.Screen name="QRGen" component={QRGen} />
+        <Stack.Screen name="QRGen" component={BuscarId} />
       </Stack.Navigator>
     </NavigationContainer>    
   );

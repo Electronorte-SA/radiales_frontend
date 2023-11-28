@@ -76,7 +76,7 @@ export const initializeDatabase = () =>{
           "SELECT * FROM parametrosqr",
           [],
           (_, result) => {
-            // console.log("los datos de la consulta", result);
+            console.log("los datos de la consulta", result);
             const rows = result.rows;
             for (let i = 0; i < rows.length; i++) {
               const item = rows.item(i);
