@@ -26,6 +26,12 @@ import { useEffect, useState } from 'react';
 
 import Boton from '../Componentes/Boton';
 
+
+
+import {
+  initializeDatabase,
+  handleSync,
+} from "./services/database.service";
 function Home({ navigation }): JSX.Element {
 
   const requestCameraPermission = async () => {
@@ -52,6 +58,8 @@ function Home({ navigation }): JSX.Element {
 
   useEffect(() => {
     requestCameraPermission();
+    initializeDatabase();
+    handleSync();
   })
 
   return (

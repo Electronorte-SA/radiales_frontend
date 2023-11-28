@@ -1,4 +1,6 @@
-import * as SQLite from "expo-sqlite";
+// import * as SQLite from "expo-sqlite";
+import SQLite from 'react-native-sqlite-storage';
+
 import axios from "axios";
 const db = SQLite.openDatabase("dbradiales.db");
 
@@ -95,6 +97,7 @@ export const initializeDatabase = () =>{
       });
 
 }
+
 
 export function getParametroFecha(){
   return new Promise((resolve, reject) => {
@@ -441,8 +444,6 @@ export function handleSearchButton() {
   });
 }
 
-
-
 export const contar = () => {
   db.transaction((tx) => {
     tx.executeSql(
@@ -462,6 +463,3 @@ export const contar = () => {
     );
   });
 };
-
-
-
