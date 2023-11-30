@@ -171,7 +171,7 @@ export const handleDelete = () => {
 //////////////////////////////////////////////////apisssssssssssssssss
 
 export const fetchToken = () => {
-  const apiUrl = "http://10.112.47.55:5000/qr/token";
+  const apiUrl = "https://radialesqr.azurewebsites.net/token";
   const apiKey = "mama"; // Código a enviar en el cuerpo de la solicitud
 
   return new Promise((resolve, reject) => {
@@ -189,7 +189,7 @@ export const fetchToken = () => {
 
 export const fetchDataSync = (generatedToken, fecha_busqueda) => {
   return new Promise((resolve, reject) => {
-    const otherApiUrl = `http://10.112.47.55:5000/qr/radialesqr?fecha_busqueda=${fecha_busqueda}`;
+    const otherApiUrl = `https://radialesqr.azurewebsites.net/radialesqr?fecha_busqueda=${fecha_busqueda}`;
     axios
       .get(otherApiUrl, {
         headers: {
@@ -360,10 +360,10 @@ export const updateRadiales = (data) => {
 export const handleSync = async () => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
-    let fecha_busqueda = await getParametroFecha(); 
+    // let fecha_busqueda = await getParametroFecha(); 
     // let fecha_busqueda = '2023-11-13 17:20:00';
 
-    // let fecha_busqueda = "";
+    let fecha_busqueda = "";
     // // const fecha_busqueda = null;
     console.log("la fecha actualizada busqueda", fecha_busqueda);
     let generatedToken = await fetchToken();
