@@ -360,7 +360,7 @@ export const updateRadiales = (data) => {
 export const handleSync = async () => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
-    // let fecha_busqueda = await getParametroFecha(); 
+    // let fecha_busqueda = await getParametrsoFecha(); 
     // let fecha_busqueda = '2023-11-13 17:20:00';
 
     let fecha_busqueda = "";
