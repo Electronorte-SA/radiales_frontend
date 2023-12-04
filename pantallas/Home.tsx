@@ -112,22 +112,22 @@ function Home({ navigation }): JSX.Element {
   return (
     <View>
       <Image style={{
-          height: 200,
+          height: 250,
           width: '100%',
           position: 'absolute'
-        }} source={require('../assets/foto-fondo.jpg')}></Image>
+        }} source={require('../assets/abajo.jpeg')}></Image>
         <Text style={{
           height: 200,
           width: '100%',
-          textAlign: 'center',
+          textAlign: 'right',
           color: 'white',
-          fontSize: 45,
-          top: 50,
+          fontSize: 30,
+          top: 200,
           textShadowColor:'black',
           textShadowOffset:{width: 0, height: 0},
-          textShadowRadius:10,
+          textShadowRadius:40,
           position: 'absolute'
-        }}>QR - RADIALES </Text>
+        }}>Raptor QR</Text>
       <ScrollView style={{
         backgroundColor: 'transparent',
         height: Dimensions.get('window').height,
@@ -149,13 +149,14 @@ function Home({ navigation }): JSX.Element {
 
           <Image style={{
             height: 200,
-            width: '100%',
+            width: '130%',
+            top: 700,
           }} source={require('../assets/tope.png')}></Image>
 
 {/* /////////////////////////////////////////////////////////////////////// */}
           <View style={{
             backgroundColor: 'black',
-            width: '100%',
+            width: '110%',
             alignItems: 'center',
           }}>
 
@@ -163,8 +164,8 @@ function Home({ navigation }): JSX.Element {
             height: '100%',
             width: '100%',
             position: 'absolute',
-            top: -50
-          }} source={require('../assets/fondo-home.jpg')}></Image>
+            top: -10
+          }} source={require('../assets/fondoradias.jpeg')}></Image>
 
 
             <View style={{
