@@ -3,16 +3,16 @@ import {ScrollView, StyleSheet, Text, Button} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 
-const FormDataScreen: React.FC<ScanDataScreenProps> = ({navigation,  formData,
+const FormDataScreen: React.FC<ScanDataScreenProps> = ({navigation,  formData,setScannedData
 }) => {
   // const [inputID, setInputID] = useState('I200783');
 
   const [scanned, setScanned] = useState<boolean>(false);
-  const [scannedData, setScannedData] = useState<any>(null);
   const [showScanDataScreen, setShowScanDataScreen] = useState<boolean>(false);
   const navigationl = useNavigation();
 
   const handleScanAgain = () => {
+    setScanned(false);
     navigationl.navigate('Home');
   };
   

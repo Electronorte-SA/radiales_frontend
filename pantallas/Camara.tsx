@@ -29,8 +29,9 @@ const Camara: React.FC<CamaraProps> = ({ navigation }) => {
   const [scannedData, setScannedData] = useState<string | null>(null);
   
   const [showScanDataScreen, setShowScanDataScreen] = React.useState(false);
-  // const [scannedData, setScannedData] = useState(null);
   const [showCamera, setShowCamera] = useState(true);
+  const [shouldNavigate, setShouldNavigate] = useState(false);
+
   const [formData, setFormData] = useState<FormData>({
     codigo: '',
     se: '',
@@ -95,50 +96,23 @@ const Camara: React.FC<CamaraProps> = ({ navigation }) => {
       console.error(ex);
       Alert.alert('Error', 'Failed to fetch data from the database');
     }
-    setShowCamera(false);
+    // setShouldNavigate(false);
 
   };
-  const resetScan = () => {
-    // Función para reiniciar el escaneo y mostrar la cámara nuevamente
-    setShowCamera(true);
-    setFormData(null);
-    setScannedData(null);
-  };
+  useEffect(() => {
+    if (shouldNavigate) {
+      // Navega a la pantalla deseada
+      navigation.push('FormDataScreen', { formData });
+      // Restablece el estado para evitar navegación múltiple
+      setShouldNavigate(false);
+    }
+  }, [shouldNavigate]);
+  
   return (
-    // <View style={{ flex: 1 }}>
-    //   <CameraScreen
-    //     actions={{ rightButtonText: 'Done', leftButtonText: 'Cancel' }}
-    //     onReadCode={(event) => onReadCode(event)}
-    //     flashImages={{
-    //       on: require('../assets/camera/flashOn.png'),
-    //       off: require('../assets/camera/flashOff.png'),
-    //       auto: require('../assets/camera/flashAuto.png'),
-    //     }}
-    //     cameraFlipImage={require('../assets/camera/cameraFlipIcon.png')}
-    //     captureButtonImage={require('../assets/camera/cameraButton.png')}
-    //     torchOnImage={require('../assets/camera/flashOn.png')}
-    //     torchOffImage={require('../assets/camera/flashOff.png')}
-    //     hideControls={false}
-    //     showCapturedImageCount={false}
-    //     style={{
-    //       backgroundColor: 'black',
-    //       width: Dimensions.get('window').width,
-    //       flex: 1
-    //     }}
-    //     scanBarcode={true}
-    //     showFrame={true}
-    //     laserColor='red'
-    //     frameColor='white'
-    //   />
-    //   {scannedData && (
-    //     <FormDataScreen formData={formData} setShowScanDataScreen={setShowScanDataScreen} />
-    //   )}
-    // </View>
     <View style={{ flex: 1 }}>
-    {showCamera && (
-      <CameraScreen
+      {!scannedData && <CameraScreen
         actions={{ rightButtonText: 'Done', leftButtonText: 'Cancel' }}
-        onReadCode={onReadCode}
+        onReadCode={(event) => onReadCode(event)}
         flashImages={{
           on: require('../assets/camera/flashOn.png'),
           off: require('../assets/camera/flashOff.png'),
@@ -159,12 +133,12 @@ const Camara: React.FC<CamaraProps> = ({ navigation }) => {
         showFrame={true}
         laserColor='red'
         frameColor='white'
-      />
-    )}
-    {scannedData && !showCamera && (
-      <FormDataScreen formData={formData} resetScan={resetScan} />
-    )}
-  </View>
+      />}
+      {scannedData && (
+        <FormDataScreen formData={formData} setScannedData={setScannedData} />
+      )}
+    </View>
+    
   );
 }
 
