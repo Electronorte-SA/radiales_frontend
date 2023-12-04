@@ -31,6 +31,7 @@ import {
 function Home({ navigation }): JSX.Element {
   const [loadedImage, setLoadedImage] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
+  
 
   const requestCameraPermission = async () => {
     try {
@@ -54,49 +55,7 @@ function Home({ navigation }): JSX.Element {
     }
   };
 
-  // useEffect(() => {
-  //   requestCameraPermission();
-  //   const checkServerStatus = async () => {
-  //     try {
-  //       // Realiza una solicitud a tu servidor para verificar su estado
-  //       const response = await fetch('https://radialesqr.azurewebsites.net');
-  //       console.log('re spon', response)
-  //       if (response.ok) {
-  //         // Si la respuesta es exitosa, muestra una alerta indicando que el servidor está corriendo
-  //         Alert.alert('Servidor Corriendo', 'El servidor está en línea.');
 
-  //       } else {
-  //         // Si la respuesta no es exitosa, muestra una alerta indicando que el servidor está caído
-  //         Alert.alert('Servidor Caído', 'No se puede acceder al servidor en este momento.');
-  //       }
-  //     } catch (error) {
-  //       // Si hay un error al realizar la solicitud, muestra una alerta indicando que el servidor está caído
-  //       Alert.alert('Servidor  Caído', 'No se puede acceder al servidor en este momento.');
-  //     }
-  //   };
-  //   // Llama a la función para verifica ssr el estado del servidor
-  //   checkServerStatus();
-  
-  //   // Inicia la animación cuando el componente se monta
-  //   setLoading(true);
-  
-  //   // Detiene la animación después de 10 segundos y ejecuta handleSync()
-  //   const timeoutId = setInterval(() => {
-  //     handleSync(); // Llama a handleSync() después de 10 segundos
-  //   }, 10000);
-  
-  //   // Inicializa la base de datos
-  //   initializeDatabase();
-  
-  //   // Maneja la sincronización
-  //   handleSync();
-  
-  //   // Limpia el temporizador y la animación al desmontar el componente
-  //   return () => {
-  //     clearInterval(timeoutId);
-  //     setLoading(false);
-  //   };
-  // }, []);
   useEffect(() => {
     // Variable auxiliar para rastrear si las funciones han completado
     let functionsCompleted = false;
@@ -145,7 +104,7 @@ function Home({ navigation }): JSX.Element {
   
     return () => {
       clearInterval(timeoutId);
-      // setLoading(false);
+      setLoading(false);
     };
   }, []);
   
@@ -193,6 +152,7 @@ function Home({ navigation }): JSX.Element {
             width: '100%',
           }} source={require('../assets/tope.png')}></Image>
 
+{/* /////////////////////////////////////////////////////////////////////// */}
           <View style={{
             backgroundColor: 'black',
             width: '100%',
@@ -212,7 +172,11 @@ function Home({ navigation }): JSX.Element {
             backgroundColor: 'transparent'
           }}>
             {/* <ActivityIndicator size={100} color="#00ff00" /> */}
-          
+            <View style={styles.loadingContainer}>
+      {loading && (
+        <ActivityIndicator size={100} color="#00ff00" />
+      )}
+    </View>
           <Boton text="SCAN QR" onPress={() => {
             navigation.push("Camara")
             }}></Boton>
@@ -225,7 +189,8 @@ function Home({ navigation }): JSX.Element {
           </View>
             
           </View>
-          
+
+{/* /////////////////////////////////////////////////////////////////////// */}
         </View>
       </ScrollView>
     </View>
