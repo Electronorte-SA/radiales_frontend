@@ -32,7 +32,7 @@ function App(): JSX.Element {
               backgroundColor: '#00CC00',
             },
             headerLeft: () => (
-              <View style={{ flexDirection: 'row', marginLeft: -15 }}>
+              <View style={{ flexDirection: 'row', marginLeft: 50 }}>
                 <Logo />
               </View>
             ),

@@ -48,7 +48,7 @@ export const initializeDatabase = () =>{
             ["ULT_ACT"],
             (_, { rows }) => {
               // console.log("las consultas de select de la fecha", rows);
-              if (rows.length > 0) {
+              if (rows.length == 0) {
                 tx.executeSql(
                   "INSERT INTO parametrosqr (NOMBRE, VALOR) VALUES (?, ?)",
                   ["ULT_ACT", ""],
@@ -91,8 +91,8 @@ export const initializeDatabase = () =>{
             );
           }
         );
+        // eliminarDatos();
         contar(); 
-
   
       });
 
@@ -108,7 +108,7 @@ export function getParametroFecha(){
         ["ULT_ACT"],
         (_, { rows }) => {
           // console.log("las consultas de select de la fecha", rows);
-          const registro = rows.item(0);
+          const registro = rows.item(0).VALOR;
 
           resolve(registro);
         },
@@ -371,7 +371,7 @@ export const handleSync = async () => {
     let data = await fetchDataSync(generatedToken, fecha_busqueda);
     // // console.log('todos mm los datos data.radiales',data.radiales)
     if (data) {
-      console.log("paso 1");
+      console.log("paso 1",fecha_busqueda);
       if (fecha_busqueda === "") {
         console.log("paso 2");
         if (data.radiales) {
@@ -459,6 +459,21 @@ export const contar = () => {
       },
       (_, error) => {
         console.error("Error al realizar la consulta:", error);
+      }
+    );
+  });
+};
+
+export const eliminarDatos = () => {
+  db.transaction((tx) => {
+    tx.executeSql(
+      "DELETE FROM radialesQR",
+      [],
+      (_, result) => {
+        console.log("Datos eliminados correctamente de la tabla radialesQR");
+      },
+      (_, error) => {
+        console.error("Error al eliminar datos de la tabla radialesQR:", error);
       }
     );
   });
