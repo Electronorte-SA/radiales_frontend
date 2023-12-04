@@ -360,11 +360,11 @@ export const updateRadiales = (data) => {
 export const handleSync = async () => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
-    // let fecha_busqueda = await getParametrsoFecha(); 
+    let fecha_busqueda = await getParametroFecha(); 
     // let fecha_busqueda = '2023-11-13 17:20:00';
 
-    let fecha_busqueda = "";
-    // // const fecha_busqueda = null;
+    // let fecha_busqueda = "";
+    // const fecha_busqueda = null;
     console.log("la fecha actualizada busqueda", fecha_busqueda);
     let generatedToken = await fetchToken();
     // console.log('vhbjnkl',generatedToken)
@@ -453,7 +453,7 @@ export const contar = () => {
       (_, result) => {
         const rowCount = result.rows.item(0).count;
         console.log(
-          "Cantidad de uuuuuuuuu datos insertados en la tabla radialesQR:",
+          "Cantidad de uuuuuuuuu dato  ccccs insertados en la tabla radialesQR:",
           rowCount
         );
       },
