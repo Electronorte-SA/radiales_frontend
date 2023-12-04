@@ -1,26 +1,7 @@
 import React, {useState, useEffect } from 'react';
 import {ScrollView, StyleSheet, Text, Button} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-interface FormData {
-  codigo: string;
-  se: string;
-  amt: string;
-  marca: string;
-  modelo_de_rele: string;
-  nombre_de_radial: string;
-  nivel_de_tension_kv: string;
-  tipo: string;
-  propietario: string;
-  latitud: string;
-  longitud: string;
-  fec_instala: string;
-  estado: string;
-  fec_camb_bateria: string;
-}
-
-interface ScanDataScreenProps {
-  navigation: any; // replace 'any' with the actual type of navigation
-}
 
 const FormDataScreen: React.FC<ScanDataScreenProps> = ({navigation,  formData,
 }) => {
@@ -29,58 +10,12 @@ const FormDataScreen: React.FC<ScanDataScreenProps> = ({navigation,  formData,
   const [scanned, setScanned] = useState<boolean>(false);
   const [scannedData, setScannedData] = useState<any>(null);
   const [showScanDataScreen, setShowScanDataScreen] = useState<boolean>(false);
-  const [formDatal, setFormData] = useState<FormData>({
-    codigo: '',
-    se: '',
-    amt: '',
-    marca: '',
-    modelo_de_rele: '',
-    nombre_de_radial: '',
-    nivel_de_tension_kv: '',
-    tipo: '',
-    propietario: '',
-    latitud: '',
-    longitud: '',
-    fec_instala: '',
-    estado: '',
-    fec_camb_bateria: '',
-  });
+  const navigationl = useNavigation();
 
-  const resetScanner = () => {
-    setScanned(false);
-    setScannedData(null);
-  };
   const handleScanAgain = () => {
-    console.log("Antes de resetear el scanner");
-    resetScanner();
-    setFormData({
-      codigo: "",
-      se: "",
-      amt: "",
-      marca: "",
-      modelo_de_rele: "",
-      nombre_de_radial: "",
-      nivel_de_tension_kv: "",
-      tipo: "",
-      propietario: "",
-      latitud: "",
-      longitud: "",
-      fec_instala: "",
-      estado: "",
-      fec_camb_bateria: "",
-    });
-    console.log("Formulario reiniciado");
-    setShowScanDataScreen(false);
-    console.log("Mostrar datos escaneados ocultos");
+    navigationl.navigate('Home');
   };
   
-
-  useEffect(() => {
-    // Lógica adicional después de cambiar el estado
-    // Puedes colocar aquí cualquier código adicional que necesite ejecutarse después del cambio de estado.
-  }, [scanned, scannedData, showScanDataScreen]);
-  
-
   return (
     <ScrollView
       contentContainerStyle={{
