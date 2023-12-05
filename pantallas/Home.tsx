@@ -66,23 +66,13 @@ function Home({ navigation }): JSX.Element {
         console.log('response', response);
   
         if (response.ok) {
-          Alert.alert(
-            'Servidor Corriendo',
-            'El servidor está en línea.',
-            [
-              {
-                text: 'OK',
-                onPress: async () => {
-                  setLoading(true);
-                  // Inicia la carga de las funciones
-                  await initializeDatabase();
-                  await handleSync();
-                  functionsCompleted = true;
-                  setLoading(false); // Oculta la animación después de que las funciones hayan terminado
-                },
-              },
-            ]
-          );
+          setLoading(true);
+          // Inicia la carga de las funciones
+          await initializeDatabase();
+          await handleSync();
+          functionsCompleted = true;
+          setLoading(false); // Oculta la animación después de que las funciones hayan terminado
+          
         } else {
           Alert.alert('Servidor Caído', 'No se puede acceder al servidor en este momento.');
           setLoading(false);
@@ -173,15 +163,17 @@ function Home({ navigation }): JSX.Element {
             backgroundColor: 'transparent'
           }}>
             {/* <ActivityIndicator size={100} color="#00ff00" /> */}
-            <View style={styles.loadingContainer}>
-      {loading && (
+            {loading ? (      <View style={styles.loadingContainer}>
+      
         <ActivityIndicator size={100} color="#00ff00" />
-      )}
-    </View>
-          <Boton text="SCAN QR" onPress={() => {
+      </View>):
+      <View>
+      <Boton text="SCAN QR" onPress={() => {
             navigation.push("Camara")
-            }}></Boton>
-          <Boton text="BUSCAR ID" onPress={() => navigation.push("QRGen")}></Boton>
+            }}></Boton><Boton text="BUSCAR ID" onPress={() => navigation.push("QRGen")}></Boton></View>}
+    
+          
+          
             <View style={{
             height: 600,
             backgroundColor: 'transparent'
