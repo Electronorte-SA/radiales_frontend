@@ -1,4 +1,4 @@
-package com.cursoappmedio1;
+package com.Radiales;
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity;

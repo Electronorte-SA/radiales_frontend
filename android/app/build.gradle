@@ -95,9 +95,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.cursoappmedio1"
+    namespace "com.Radiales"
     defaultConfig {
-        applicationId "com.guaire.cursoappmedio1"
+        applicationId "com.guaire.Radiales"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

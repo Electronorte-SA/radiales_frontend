@@ -1,15 +1,15 @@
 {
   "project_info": {
     "project_number": "265955983149",
-    "project_id": "cursoappmedio1",
-    "storage_bucket": "cursoappmedio1.appspot.com"
+    "project_id": "Radiales",
+    "storage_bucket": "Radiales.appspot.com"
   },
   "client": [
     {
       "client_info": {
         "mobilesdk_app_id": "1:265955983149:android:909232aad563b36cbe5da4",
         "android_client_info": {
-          "package_name": "com.guaire.cursoappmedio1"
+          "package_name": "com.guaire.Radiales"
         }
       },
       "oauth_client": [

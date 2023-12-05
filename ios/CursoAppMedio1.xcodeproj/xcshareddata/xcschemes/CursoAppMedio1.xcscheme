@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "CursoAppMedio1.app"
-               BlueprintName = "CursoAppMedio1"
-               ReferencedContainer = "container:CursoAppMedio1.xcodeproj">
+               BuildableName = "Radiales.app"
+               BlueprintName = "Radiales"
+               ReferencedContainer = "container:Radiales.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "CursoAppMedio1Tests.xctest"
-               BlueprintName = "CursoAppMedio1Tests"
-               ReferencedContainer = "container:CursoAppMedio1.xcodeproj">
+               BuildableName = "RadialesTests.xctest"
+               BlueprintName = "RadialesTests"
+               ReferencedContainer = "container:Radiales.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "CursoAppMedio1.app"
-            BlueprintName = "CursoAppMedio1"
-            ReferencedContainer = "container:CursoAppMedio1.xcodeproj">
+            BuildableName = "Radiales.app"
+            BlueprintName = "Radiales"
+            ReferencedContainer = "container:Radiales.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "CursoAppMedio1.app"
-            BlueprintName = "CursoAppMedio1"
-            ReferencedContainer = "container:CursoAppMedio1.xcodeproj">
+            BuildableName = "Radiales.app"
+            BlueprintName = "Radiales"
+            ReferencedContainer = "container:Radiales.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
