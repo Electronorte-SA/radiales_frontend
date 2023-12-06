@@ -1,5 +1,5 @@
-import React, { useEffect,useRef  , useState } from 'react';
-import { ScrollView, View,Keyboard , Text, TextInput, Button, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, View, Text, TextInput, Button, StyleSheet,ActivityIndicator,Alert } from 'react-native';
 import FormDataScreen from './FormData';
 import { useNavigation } from '@react-navigation/native';
 
@@ -27,13 +27,9 @@ interface FormData {
   estado: string;
   fec_camb_bateria: string;
 }
-
 const BuscarId: React.FC<QRGenProps> = ({ navigation }) => {
-  // const [showScanDataScreen, setShowScanDataScreen] = useState(false);
   const [inputID, setInputID] = useState("I200783");
-  
   const [scanned, setScanned] = useState<boolean>(false);
-  // const [formData, setFormData] = useState<any>(/* Define la estructura de formData según tus necesidades */);
   const [formData, setFormData] = useState<FormData>({
     codigo: '',
     se: '',
@@ -51,11 +47,15 @@ const BuscarId: React.FC<QRGenProps> = ({ navigation }) => {
     fec_camb_bateria: '',
   });
 
-
   const [showScanDataScreen, setShowScanDataScreen] = React.useState(false);
+  const [searching, setSearching] = React.useState(false);
+
   const handleSearchButton = async () => {
     try {
+      
+      setSearching(true);
       let registro = await getRadialById(inputID);
+      setSearching(false);
       console.log('registro', registro);
       if (registro && registro.codigo) {
         setFormData({
@@ -74,41 +74,26 @@ const BuscarId: React.FC<QRGenProps> = ({ navigation }) => {
           estado: registro.estado,
           fec_camb_bateria: registro.fec_camb_bateria,
         });
-
+        
         setShowScanDataScreen(true);
       } else {
-        // ID no encontrado
-        setShowScanDataScreen(true);
-        setFormData(null); // Puedes ajustar esto según la estructura de tu FormData
+        setShowScanDataScreen(false);
+        Alert.alert('No se encontró registro');
+         
+        setFormData(null); 
       }
     } catch (ex) {
       console.error(ex);
     }
   };
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      'keyboardDidShow',
-      () => {
-        // Cuando se muestra el teclado, enfoca en el TextInput
-        inputRef.current.focus();
-      }
-    );
-
-    return () => {
-      // Limpia el listener cuando el componente se desmonta
-      keyboardDidShowListener.remove();
-    };
-  }, []);
-
   const navigationl = useNavigation();
 
   const handleScanAgain = () => {
     setScanned(false);
     navigationl.navigate('Home');
   };
-  
+  if(searching)
+    return <ActivityIndicator size={100} color="#00ff00" />
   return (
     <ScrollView contentContainerStyle={styles.containeru}>
     <View>
@@ -116,23 +101,26 @@ const BuscarId: React.FC<QRGenProps> = ({ navigation }) => {
         <View style={styles.centeredContent}>
           <Text style={styles.titlem}>Buscar por ID</Text>
           <TextInput
-            style={styles.input}
+            style={{
+              height: 40,
+              borderColor: 'gray',
+              borderWidth: 1,
+              marginBottom: 10,
+              paddingHorizontal: 10,
+              width: '80%',
+              color: 'black',  
+            }}
             placeholder="Introduce un ID"
             onChangeText={(text) => setInputID(text)}
             value={inputID}
-          />
+            
+          />            
           <Button title="Buscar" onPress={handleSearchButton} />
+
         </View>
-      ) : formData ? (
+      ) : formData && (
         <FormDataScreen formData={formData} setShowScanDataScreen={setShowScanDataScreen} />
-      ) : (
-        <View style={styles.centeredContent}>
-          <Text style={styles.titlem}>ID no encontrado</Text>
-          {/* Puedes agregar más contenido o mensajes si es necesario */}
-          
-      <Button title="BUSQUEDA NUEVA" onPress={handleScanAgain} />
-        </View>
-      )}
+      )  }
     </View>
   </ScrollView>
 );
@@ -147,15 +135,17 @@ const styles = StyleSheet.create({
   },
   titlem: {
     fontSize: 20,
+    color : "black",
     marginBottom: 10,
   },
   input: {
+    
     height: 40,
-    borderColor: 'gray',
+    borderColor: 'black',
     borderWidth: 1,
     marginBottom: 10,
     paddingHorizontal: 10,
-    width: '80%', // Puedes ajustar el ancho según tus necesidades
+    width: '80%', 
   },
 });
 
