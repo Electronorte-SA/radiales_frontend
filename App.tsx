@@ -9,7 +9,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 const Logo = () => (
   <Image
     source={require('./assets/logo3.png')}
-    style={{ width: '90%', height: 60 }}
+    style={{ width: '57%', height: 40 }}
   />
 );
 
@@ -24,15 +24,15 @@ function App(): JSX.Element {
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
-          name="Home"
-          component={Home}
+          name="Dpto. Operaciones"
+       component={Home}
           options={{
             // title: 'Home - 1',
             headerStyle: {
-              backgroundColor: '#00CC00',
+              backgroundColor: '#ffffff',  // Código para el color blanco
             },
             headerLeft: () => (
-              <View style={{ flexDirection: 'row', marginLeft: 50 }}>
+              <View style={{ flexDirection: 'row', marginLeft: '-4%' }}>
                 <Logo />
               </View>
             ),

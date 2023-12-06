@@ -19,6 +19,8 @@ import {
 
 
 import { useEffect, useState } from 'react';
+import { Grayscale } from 'react-native-image-filter-kit';
+
 
 import Boton from '../Componentes/Boton';
 
@@ -101,11 +103,12 @@ function Home({ navigation }): JSX.Element {
   
   return (
     <View>
+      
       <Image style={{
           height: 250,
           width: '100%',
           position: 'absolute'
-        }} source={require('../assets/abajo.jpeg')}></Image>
+        }} source={require('../assets/fondo6.jpeg')}></Image>
         <Text style={{
           height: 200,
           width: '100%',
@@ -151,10 +154,16 @@ function Home({ navigation }): JSX.Element {
           }}>
 
           <Image style={{
+
             height: '100%',
             width: '100%',
             position: 'absolute',
+            backgroundColor: 'rgba(255, 255, 255, 255)', // Opacidad del 50%
+            // border: 2px solid #000; /* ancho, tipo y color del borde */
+            // borderRadius: 50, /* radio de la esquina para redondear */
+
             top: -10
+            
           }} source={require('../assets/fondoradias.jpeg')}></Image>
 
 
