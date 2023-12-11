@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { RouteProp } from '@react-navigation/native';
 
 const Logo = () => (
   <Image
@@ -23,21 +24,24 @@ function App(): JSX.Element {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        <Stack.Screen
-          name="Dpto. Operaciones"
-       component={Home}
-          options={{
-            // title: 'Home - 1',
-            headerStyle: {
-              backgroundColor: '#ffffff',  // Código para el color blanco
-            },
-            headerLeft: () => (
-              <View style={{ flexDirection: 'row', marginLeft: '-4%' }}>
-                <Logo />
-              </View>
-            ),
-          }}
-        />
+      <Stack.Screen
+  name="Dpto. Operaciones"
+  component={Home}
+  options={({ route }: { route: RouteProp<YourParamList, 'Dpto. Operaciones'> }) => ({
+    headerStyle: {
+      backgroundColor: '#ffffff',
+    },
+    headerLeft: () => (
+      <View style={{ flexDirection: 'row', marginLeft: '-1%' }}>
+        <Logo />
+      </View>
+    ),
+    headerTitleAlign: route.params?.horizontal ? 'left' : 'right',
+  })}
+/>
+
+    
+
         <Stack.Screen name="Camara" component={Camara} />
         <Stack.Screen name="QRGen" component={BuscarId} />
       </Stack.Navigator>

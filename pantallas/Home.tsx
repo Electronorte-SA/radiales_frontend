@@ -124,9 +124,12 @@ function Home({ navigation }): JSX.Element {
       <ScrollView style={{
         backgroundColor: 'transparent',
         height: Dimensions.get('window').height,
-        width: Dimensions.get('window').width,
+        width: '100%',
         alignContent: 'center',
-      }}>
+      }}
+      nestedScrollEnabled={false} // Agrega esta línea para desactivar el desplazamiento
+
+      >
         
         
         <View style={{
@@ -185,6 +188,8 @@ function Home({ navigation }): JSX.Element {
           
             <View style={{
             height: 600,
+            
+          width: '100%',
             backgroundColor: 'transparent'
           }}></View>
             
