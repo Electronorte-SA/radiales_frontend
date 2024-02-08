@@ -70,12 +70,12 @@ export const initializeDatabase = () => {
     tx.executeSql(
       'CREATE TABLE IF NOT EXISTS subestaciones (' +
         'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
-        'provincia TEXT, ' +
-        'distrito TEXT, ' +
-        'direccion TEXT, ' +
+        'provincia TEXT, ' +  
+        'distrito TEXT, ' + //estte
+        'direccion TEXT, ' + //este columna vamos a trabaja en las busquedad
         'u_negocio TEXT, ' +
-        'amt TEXT, ' +
-        'sed TEXT, ' +
+        'amt TEXT, ' +  //este columna vamos a trabaja en las busquedad
+        'sed TEXT, ' + //este columna vamos a trabaja en las busquedad
         'fecha_instalacion DATE, ' +
         'tipo TEXT, ' +
         'propietario TEXT, ' +
@@ -141,6 +141,7 @@ export const initializeDatabase = () => {
 
     // eliminarDatos();
     contar();
+    contarsubestaciones();
   });
   
 };
@@ -269,30 +270,7 @@ export const fetchDataSync = (generatedToken, fecha_busqueda) => {
 
 // get de subestaciones 
 // const fecha_busqueda_subestaciones = '2024-01-03 23:41:00';
-// export const fetchSubestacionesDataSync = (generatedToken, fecha_busqueda_subestaciones) => {
-//   return new Promise((resolve, reject) => {
-//     const apiUrl = `https://radialesqr.azurewebsites.net/subestaciones?fecha_busqueda_subestaciones=${fecha_busqueda_subestaciones}`;
-//     axios
-//       .get(apiUrl, {
-//         headers: {
-//           Authorization: `Bearer ${generatedToken}`,
-//         },
-//       })
-//       .then(response => {
-//         const dataFromAPI = response.data;
-//         console.log('Datos de la API de subestaciones:', dataFromAPI); // Imprimir datos en la consola
-//         resolve(dataFromAPI);
-//       })
-//       .catch(error => {
-//         console.error('Error al obtener los datos de la API de subestaciones:', error); // Imprimir error en la consola
-//         reject(error);
-//       });
-//   });
-// };
-
-
-export const fetchSubestacionesDataSync = (generatedToken) => {
-  const fecha_busqueda_subestaciones = '2024-01-03 23:41:00'; // Definir la fecha de búsqueda
+export const fetchSubestacionesDataSync = (generatedToken, fecha_busqueda_subestaciones) => {
   return new Promise((resolve, reject) => {
     const apiUrl = `https://radialesqr.azurewebsites.net/subestaciones?fecha_busqueda_subestaciones=${fecha_busqueda_subestaciones}`;
     axios
@@ -303,7 +281,7 @@ export const fetchSubestacionesDataSync = (generatedToken) => {
       })
       .then(response => {
         const dataFromAPI = response.data;
-        console.log('Datos de la API de subestaciones:', dataFromAPI); // Imprimir datos en la consola
+        // console.log('Datos de la API de subestaciones:', dataFromAPI);  // Imprimir datos en la consola
         resolve(dataFromAPI);
       })
       .catch(error => {
@@ -313,8 +291,7 @@ export const fetchSubestacionesDataSync = (generatedToken) => {
   });
 };
 
-/////////////////////////////////////fecha
-
+///////////actuacion de fechas de radiales 
 const actualizarFechaEnParametrosQR = fecha => {
   return new Promise((resolve, reject) => {
     console.log('Fecha a actualizar:', fecha);
@@ -341,6 +318,35 @@ const actualizarFechaEnParametrosQR = fecha => {
     });
   });
 };
+
+//actualizacon de fecha de subestacciones 
+const actualizarFechaEnParametrosQRSubestaciones = fecha => {
+  return new Promise((resolve, reject) => {
+    console.log('Fecha a actualizar en parametrosqrsubestaciones:', fecha);
+    db.transaction(tx => {
+      tx.executeSql(
+        'UPDATE parametrosqrsubestaciones SET VALOR=? WHERE NOMBRE=?',
+        [fecha, 'ULT_ACT'],
+        (_, result) => {
+          console.log('Resultado de la actualización en parametrosqrsubestaciones:', result);
+          console.log(
+            'Fecha actualizada con éxito en la tabla parametrosqrsubestaciones:',
+            fecha,
+          );
+          resolve('Éxito al actualizar la fecha en parametrosqrsubestaciones');
+        },
+        (_, error) => {
+          console.error(
+            'Error al actualizar la fecha en la tabla parametrosqrsubestaciones:',
+            error,
+          );
+          reject('Error al actualizar la fecha en parametrosqrsubestaciones');
+        },
+      );
+    });
+  });
+};
+
 ///////////////////////////////insertarrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
 export const insertRadiales = data => {
   return new Promise((resolve, reject) => {
@@ -398,7 +404,66 @@ export const insertRadiales = data => {
   });
 };
 
-///////////////////////////////////7actualizas7///////////////////////
+
+///inserta las subestaciones 
+export const insertSubestaciones = data => {
+  console.log('has lllegado al metodo de datos', data.length)
+  return new Promise((resolve, reject) => {  
+    const batchSize = 100;
+    const batches = [];
+
+    for (let i = 0; i < data.length; i += batchSize) {
+      batches.push(data.slice(i, i + batchSize));
+    }
+    
+  console.log('has lllegado al metodo de batches', batches.length)
+
+    const insertPromises = batches.map(batch => {
+      return new Promise((resolve, reject) => {
+        db.transaction(
+          tx => {
+            batch.forEach(item => {
+              tx.executeSql(
+                'INSERT INTO subestaciones (provincia, distrito, direccion, u_negocio, amt, sed, fecha_instalacion, tipo, propietario, direccion2, coordenadas, transformador) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [
+                  item.provincia,
+                  item.distrito,
+                  item.direccion,
+                  item.u_negocio,
+                  item.amt,
+                  item.sed,
+                  item.fecha_instalacion,
+                  item.tipo,
+                  item.propietario,
+                  item.direccion2,
+                  item.coordenadas,
+                  item.transformador,
+                ],
+                (_, result) => {},
+              );
+            });
+          },
+          txError => {
+            reject(txError);
+          },
+          () => {
+            resolve(true);
+          },
+        );
+      });
+    });
+
+    Promise.all(insertPromises)
+      .then(() => {
+        resolve('Inserción los datos de subestacciones  completa');
+      })
+      .catch(error => {
+        reject(`Error al insertar subestacciones datos: ${error}`);
+      });
+  });
+};
+
+
 export const updateRadiales = data => {
   return new Promise((resolve, reject) => {
     const batchSize = 10;
@@ -459,21 +524,80 @@ export const updateRadiales = data => {
       });
   });
 };
+export const updateSubestaciones = data => {
+  return new Promise((resolve, reject) => {
+    const batchSize = 10;
+    const batches = [];
+    
+    // Dividir los datos en lotes
+    for (let i = 0; i < data.length; i += batchSize) {
+      batches.push(data.slice(i, i + batchSize));
+    }
 
+    // Mapa de promesas para los lotes de actualización
+    const updatePromises = batches.map(batch => {
+      return new Promise((resolve, reject) => {
+        db.transaction(
+          tx => {
+            batch.forEach(item => {
+              tx.executeSql(
+                'UPDATE subestaciones SET provincia = ?, distrito = ?, direccion = ?, u_negocio = ?, amt = ?, sed = ?, fecha_instalacion = ?, tipo = ?, propietario = ?, direccion2 = ?, coordenadas = ?, transformador = ? WHERE id = ?',
+                [
+                  item.provincia,
+                  item.distrito,
+                  item.direccion,
+                  item.u_negocio,
+                  item.amt,
+                  item.sed,
+                  item.fecha_instalacion,
+                  item.tipo,
+                  item.propietario,
+                  item.direccion2,
+                  item.coordenadas,
+                  item.transformador,
+                  parseInt(item.id, 10), // Convertir el ID a entero
+                ],
+                (_, result) => {
+                  // Registro actualizado con ID
+                },
+                txError => {
+                  reject(txError);
+                },
+              );
+            });
+          },
+          txError => {
+            reject(txError);
+          },
+          () => {
+            resolve();
+          },
+        );
+      });
+    });
+
+    // Esperar a que todas las promesas de actualización se resuelvan
+    Promise.all(updatePromises)
+      .then(() => {
+        resolve('Actualización de datos completa');
+      })
+      .catch(error => {
+        reject(`Error al actualizar datos: ${error}`);
+      });
+  });
+};
 //////////////////////////////////////////mainnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-export const handleSync = async () => {
+export const handleSync = async (generatedToken) => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
     let fecha_busqueda = await getParametroFecha();
     // let fecha_busqueda = '2023-11-13 17:20:00';
-
-    // let fecha_busqueda = "";
-    // const fecha_busqueda = null;
-    console.log('la fecha actualizada busqueda', fecha_busqueda);
-    let generatedToken = await fetchToken();
+   
+    // console.log('la fecha actualizada busqueda', fecha_busqueda);
     // console.log('vhbjnkl',generatedToken)
     let data = await fetchDataSync(generatedToken, fecha_busqueda);
-    // // console.log('todos mm los datos data.radiales',data.radiales)
+
+    ///////////////////raduiales//////////////////////////////////////////////////////
     if (data) {
       console.log('paso 1', fecha_busqueda);
       if (fecha_busqueda === '') {
@@ -481,7 +605,7 @@ export const handleSync = async () => {
         if (data.radiales) {
           console.log('paso 3');
           let exito_insertar = await insertRadiales(data.radiales);
-          console.log('los datos mm de boton en insertado', exito_insertar);
+          console.log('subestaciones con existos de boton en insertado', exito_insertar_subestsacionnes);
         }
       } else {
         if (data) {
@@ -514,13 +638,98 @@ export const handleSync = async () => {
         }
       }
     }
-
+    
+    ///////////////LA FECHA DE RADIALES 
     let fecha = data.fecha;
 
-    console.log('la fechas de la api', fecha);
     if (fecha) {
       let la_fecha_actualida = await actualizarFechaEnParametrosQR(fecha);
       console.log('la fecha fue actualiz a', la_fecha_actualida);
+    }
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+// // variables de datos 22222222222
+    let fecha_busqueda_subestacciones =  await getParametroFechaSubestaciones(  );
+//  let fecha_busqueda_subestacciones = "";
+    
+    let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
+    
+    ///////////////LA SUBESTACIONES 
+
+    if (data2) {
+      if (fecha_busqueda_subestacciones === '') {
+        console.log('paso subestaciones  2');
+        if (data2.subestaciones) {
+          console.log('pasosubestaciones  3'); 
+          let exito_insertar_subestacionnes = await insertSubestaciones(data2.subestaciones);
+        }   
+      }
+    }
+    ///////////////LA FECHA DE SUBESTACIONES
+    let fecha_subetaciones = data2.fecha;
+
+    if (fecha_subetaciones) {
+      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha);
+      console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
+    }
+
+
+    /////////////////////////////////////////////////////////7
+  } catch (ex) {
+    console.error(ex);
+  }
+  // const fecha_busqueda = '2023-10-24 8:30:00';
+};
+
+//por paramentro de fecha
+export const handleSyncSub = async (generatedToken) => {
+  try {
+    
+ let fecha_busqueda_subestacciones = await getParametroFechaSubestaciones(  );
+//  let fecha_busqueda_subestacciones = "";
+    let fecha = data.fecha;
+    let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
+    // console.log('todos mm los datos subtaciones',data2.subestaciones)
+
+  if (data2) {
+          console.log('paso 4 subestaciones');
+          if (data2.subestaciones) {
+            console.log('paso 5 subestaciones');
+            let dataInsertar = data2.subestaciones.filter(
+              item => (item.accion = 'insertar'),
+            );
+
+            console.log('paso 6 subestaciones');
+            let dataActualizar_sub = data2.radiales.filter(
+              item => (item.accion = 'actualizar'),
+            );
+
+            console.log('paso 7 subestaciones');
+            if (dataInsertar) {
+              let exito_insertar = await insertSubestaciones(dataInsertar);
+
+              // console.log('datos isertados por la fecha',exito_insertar)
+            }
+
+            console.log('paso 8');
+            if (dataActualizar_sub) {
+              let exito_actualizar = await updateSubestaciones(dataActualizar_sub);
+              console.log('paso 9');
+              console.log('datos de subestaciones', exito_actualizar);
+            }
+          }
+        }
+    /////////////////////////////////////////
+    let fecha_subetaciones = data2.fecha;
+
+    if (fecha_subetaciones) {
+      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha);
+      console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
   } catch (ex) {
     console.error(ex);
@@ -573,6 +782,25 @@ export const contar = () => {
     );
   });
 };
+export const contarsubestaciones = () => {
+  db.transaction(tx => {
+    tx.executeSql(
+      'SELECT COUNT(*) AS count FROM subestaciones',
+      [],
+
+      (_, result) => {
+        const rowCount = result.rows.item(0).count;
+        console.log(
+          'Cantidad de uuuuuuuuu dato  ccccs insertados en subestaciones:',
+          rowCount,
+        );
+      },
+      (_, error) => {
+        console.error('Error al realizar la consulta subestaciones:', error);
+      },
+    );
+  });
+};
 
 export const eliminarDatos = () => {
   db.transaction(tx => {
@@ -589,26 +817,95 @@ export const eliminarDatos = () => {
   });
 };
 
-export const eliminarDatosSubestaciones = (generatedToken) => {
-  fetchSubestacionesDataSync(generatedToken)
-    .then(data => {
-      // Aquí puedes realizar cualquier acción adicional con los datos obtenidos, como eliminarlos de la base de datos local
-      console.log('Datos de subestaciones obtenidos correctamente:', data);
-    })
-    .catch(error => {
-      console.error('Error al obtener datos de subestaciones:', error);
-    });
+export const eliminarDatosSubestaciones = () => {
+  db.transaction(tx => {
+    tx.executeSql(
+      'DELETE FROM subestaciones',
+      [],
+      (_, result) => {
+        console.log('Datos eliminados correctamente de la tabla subestaciones');
+      },
+      (_, error) => {
+        console.error('Error al eliminar datos de la tabla subestaciones:', error);
+      },
+    );
+  });
 };
 
 
 export const botonsubestaciones = async (generatedToken) => {
   try {
-    const data = await fetchSubestacionesDataSync(generatedToken);
+    console.log('general las subestaciones')
+    // const data = await fetchSubestacionesDataSync(generatedToken);
+    const data = await  eliminarDatosSubestaciones();
     // Aquí puedes realizar cualquier acción adicional con los datos obtenidos, como eliminarlos de la base de datos local
     console.log('Datos de subestaciones obtenidos correctamente:', data);
-    return data;
+    return data; 
   } catch (error) {
     console.error('Error al obtener datos de subestaciones:', error);
     throw error;
   }
 };
+
+
+
+///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
+// export function searchSubestaciones(query) {
+//   // console.log('el imputttt ',query)
+//   return new Promise((resolve, reject) => {
+//     db.transaction(tx => {
+//       tx.executeSql(
+//         `SELECT
+//           subestaciones.direccion,
+//           subestaciones.amt,
+//           subestaciones.sed
+//         FROM subestaciones
+//         WHERE
+//         UPPER(subestaciones.direccion) LIKE UPPER(?) OR
+//         UPPER(subestaciones.amt) LIKE UPPER(?) OR
+//         UPPER(subestaciones.sed) LIKE UPPER(?)`,
+//         [`%${query}%`, `%${query}%`, `%${query}%`],
+//         (_, { rows }) => {
+//         console.log('los rows',rows)
+//           const results = rows._array;
+//           console.log('los datos de la consulta', results)
+//           resolve(results);
+//         },
+//         (_, error) => {
+//           reject(error);
+//         }
+//       );
+//     });
+//   });
+// }
+export function searchSubestaciones(query) {
+  // console.log('el imputttt ',query)
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        `SELECT
+          subestaciones.direccion,
+          subestaciones.amt,
+          subestaciones.sed
+        FROM subestaciones
+        WHERE
+        UPPER(subestaciones.direccion) LIKE UPPER(?) OR
+        UPPER(subestaciones.amt) LIKE UPPER(?) OR
+        UPPER(subestaciones.sed) LIKE UPPER(?)`,
+        [`%${query}%`, `%${query}%`, `%${query}%`],
+        (_, { rows }) => {
+          const results = [];
+          for (let i = 0; i < rows.length; i++) {
+            results.push(rows.item(i));
+          }
+          console.log('Resultados:', results);
+          resolve(results);
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+}
+

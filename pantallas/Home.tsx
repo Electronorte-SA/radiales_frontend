@@ -22,11 +22,11 @@ import {Grayscale} from 'react-native-image-filter-kit';
 
 import Boton from '../Componentes/Boton';
 
-import {initializeDatabase, handleSync, botonsubestaciones} from './services/database.service';
+import {initializeDatabase, handleSync, botonsubestaciones, handleSyncSub, fetchToken} from './services/database.service';
 function Home({navigation}): JSX.Element {
   const [loadedImage, setLoadedImage] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-
+  const [token, setToken] = useState("")
   const requestCameraPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -49,23 +49,31 @@ function Home({navigation}): JSX.Element {
     }
   };
 
+  let inicializaCompletado = false;
+  let sincronizaCompletado = true;
   useEffect(() => {
     // Variable auxiliar para rastrear si las funciones han completado
-    let functionsCompleted = false;
+    const inicio = async ()=>{
+      await initializeDatabase(); 
+      inicializaCompletado = true;
 
-    const fetchData = async () => {
+    }
+    const sincroniza = async () => {
       try {
         const response = await fetch('https://radialesqr.azurewebsites.net');
         console.log('response', response);
-
+        sincronizaCompletado = false
         if (response.ok) {
+          let generatedToken = await fetchToken();
+          setToken(generatedToken)
           setLoading(true);
           // Inicia la carga de las funciones
-          await initializeDatabase();
-          await handleSync();
-          functionsCompleted = true;
-          setLoading(false); // Oculta la animación después de que las funciones hayan terminado
+         
+          await handleSync(generatedToken);
+          sincronizaCompletado = true;
+          setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
         } else {
+          sincronizaCompletado = true
           Alert.alert(
             'Servidor Caído',
             'No se puede acceder al servidor en este momento.',
@@ -73,6 +81,7 @@ function Home({navigation}): JSX.Element {
           setLoading(false);
         }
       } catch (error) {
+        sincronizaCompletado = true
         Alert.alert(
           'Servidor Caído',
           'No se puede acceder al servidor en este momento.',
@@ -80,13 +89,13 @@ function Home({navigation}): JSX.Element {
         setLoading(false);
       }
     };
+    inicio()
 
-    fetchData();
-
+    
     const timeoutId = setInterval(() => {
-      // Comprueba si las funciones han completado antes de ejecutar handleSync
-      if (functionsCompleted) {
-        handleSync();
+      // Comprueba si las funciones han completado antes  de ejecutar handleSync
+      if (inicializaCompletado && sincronizaCompletado) {
+        sincroniza();
       }
     }, 10000);
 
@@ -186,11 +195,18 @@ function Home({navigation}): JSX.Element {
                     }}></Boton>
                   <Boton
                     text="BUSCAR ID"
-                    onPress={() => navigation.push('QRGen')}></Boton>
+                    onPress={() => navigation.push('QRGen')}
+                    ></Boton>
+                     <Boton
+                    text="BUSCAR BUSE"
+                    onPress={() => navigation.push('BuscaSube')}
+                    ></Boton>
 
                       <Boton
-                    text="BUSCAR SUBTACIONES"
-                    onPress={() => botonsubestaciones()}></Boton>
+                    text="eleminar"
+                    onPress={() =>  botonsubestaciones(token)}>
+
+                    </Boton>
                 </View>
               )}
 

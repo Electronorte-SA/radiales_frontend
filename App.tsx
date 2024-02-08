@@ -17,6 +17,7 @@ const Logo = () => (
 import Home from './pantallas/Home';
 import Camara from './pantallas/Camara';
 import BuscarId from './pantallas/BuscarId';
+import BuscaSube from './pantallas/BuscaSube';
 
 function App(): JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -44,6 +45,7 @@ function App(): JSX.Element {
 
         <Stack.Screen name="Camara" component={Camara} />
         <Stack.Screen name="QRGen" component={BuscarId} />
+        <Stack.Screen name="BuscaSube" component={BuscaSube} />
       </Stack.Navigator>
     </NavigationContainer>
   );
