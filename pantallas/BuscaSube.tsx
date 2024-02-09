@@ -1,26 +1,28 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { searchSubestaciones } from './services/database.service';
 import debounce from 'lodash/debounce';
-import { RadioButton } from 'react-native-paper';
 
 const BuscaSube = () => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
-  const [showResults, setShowResults] = useState(false);
-  const [page, setPage] = useState(1);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [pagination, setPagination] = useState({ page: 1, pageSize: 5 });
   const navigation = useNavigation();
 
+  useEffect(() => {
+    if (searchText !== '') {
+      handleSearchTextChange(searchText);
+    }
+  }, [pagination]); // Trigger search when pagination changes
+
   const handleSearchTextChange = async (text) => {
-    setSearchText(text);
     setSearching(true);
-    setShowResults(true);
     try {
-      const results = await searchSubestaciones(text);
-      setSearchResults(results || []);
+      const results = await searchSubestaciones(text, pagination.page, pagination.pageSize);
+      setSearchResults(prevResults => pagination.page === 1 ? results : [...prevResults, ...results]);
     } catch (error) {
       console.error("Error al buscar subestaciones:", error);
       Alert.alert("Error", "Ocurrió un error al buscar subestaciones. Por favor, inténtelo de nuevo.");
@@ -29,27 +31,41 @@ const BuscaSube = () => {
   };
 
   const handleSearchButtonPress = () => {
-    handleSearchTextChange(searchText);
+    setPagination({ ...pagination, page: 1 });
   };
 
   const debouncedSearch = debounce(handleSearchTextChange, 300);
 
-  const loadMoreResults = () => {
+  const loadMoreResults = async () => {
     if (!loadingMore) {
       setLoadingMore(true);
-      setTimeout(() => {
-        setSearchResults(prevResults => [...prevResults, { direccion: 'Additional Result 1' }, { direccion: 'Additional Result 2' }]);
-        setPage(prevPage => prevPage + 1);
-        setLoadingMore(false);
-      }, 1000);
+      try {
+        const nextPageResults = await searchSubestaciones(searchText, pagination.page + 1, pagination.pageSize);
+        if (nextPageResults && nextPageResults.length > 0) {
+          setSearchResults(prevResults => [...prevResults, ...nextPageResults]);
+          setPagination(prevPagination => ({ ...prevPagination, page: prevPagination.page + 1 }));
+        } else {
+          // No hay más resultados disponibles
+          console.log('No hay más resultados disponibles.');
+        }
+      } catch (error) {
+        console.error("Error al cargar más resultados:", error);
+        Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
+      }
+      setLoadingMore(false);
     }
   };
+
+  const paginatedResults = useMemo(() => {
+    const start = (pagination.page - 1) * pagination.pageSize;
+    const end = start + pagination.pageSize;
+    return searchResults.slice(start, end);
+  }, [pagination, searchResults]);
 
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>Buscar Subestaciones</Text>
-
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
@@ -79,7 +95,7 @@ const BuscaSube = () => {
             <Text style={styles.headerText}>SED</Text>
           </View>
           <FlatList
-            data={searchResults}
+            data={paginatedResults}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item }) => (
               <View style={styles.resultItem}>
@@ -91,7 +107,11 @@ const BuscaSube = () => {
             )}
             onEndReached={loadMoreResults}
             onEndReachedThreshold={0.1}
-            ListFooterComponent={loadingMore && <ActivityIndicator size="small" color="#0000ff" />}
+            ListFooterComponent={() => (
+              <View>
+                {loadingMore && <ActivityIndicator size="small" color="#0000ff" />}
+              </View>
+            )}
           />
         </View>
       )}

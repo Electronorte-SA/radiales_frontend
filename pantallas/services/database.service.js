@@ -850,45 +850,20 @@ export const botonsubestaciones = async (generatedToken) => {
 
 
 ///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
-// export function searchSubestaciones(query) {
-//   // console.log('el imputttt ',query)
-//   return new Promise((resolve, reject) => {
-//     db.transaction(tx => {
-//       tx.executeSql(
-//         `SELECT
-//           subestaciones.direccion,
-//           subestaciones.amt,
-//           subestaciones.sed
-//         FROM subestaciones
-//         WHERE
-//         UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//         UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//         UPPER(subestaciones.sed) LIKE UPPER(?)`,
-//         [`%${query}%`, `%${query}%`, `%${query}%`],
-//         (_, { rows }) => {
-//         console.log('los rows',rows)
-//           const results = rows._array;
-//           console.log('los datos de la consulta', results)
-//           resolve(results);
-//         },
-//         (_, error) => {
-//           reject(error);
-//         }
-//       );
-//     });
-//   });
-// }
+
 export function searchSubestaciones(query) {
   // console.log('el imputttt ',query)
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
         `SELECT
+          subestaciones.distrito,
           subestaciones.direccion,
           subestaciones.amt,
           subestaciones.sed
         FROM subestaciones
         WHERE
+        UPPER(subestaciones.distrito) LIKE UPPER(?) OR
         UPPER(subestaciones.direccion) LIKE UPPER(?) OR
         UPPER(subestaciones.amt) LIKE UPPER(?) OR
         UPPER(subestaciones.sed) LIKE UPPER(?)`,
