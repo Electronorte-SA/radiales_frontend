@@ -118,7 +118,6 @@ const BuscaSube = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -131,6 +130,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black', // Color negro para el título
   },
   searchContainer: {
     flexDirection: 'row',
@@ -141,9 +141,10 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     borderWidth: 1,
-    borderColor: 'gray',
+    borderColor: 'black',
     paddingHorizontal: 10,
     marginRight: 10,
+    color: 'black', // Color negro para el texto ingresado
   },
   searchButton: {
     backgroundColor: '#007bff',
@@ -161,6 +162,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
+    color: 'black', // Color negro para el título de los resultados
   },
   resultHeader: {
     flexDirection: 'row',
@@ -174,6 +176,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: 'black', // Color negro para el texto del encabezado
   },
   resultItem: {
     flexDirection: 'row',
@@ -186,7 +189,10 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
     textAlign: 'center',
+    fontWeight: 'bold', // Texto en negrita para los datos de la tabla
+    color: 'black', // Color negro para el texto de los datos
   },
 });
+
 
 export default BuscaSube;

@@ -22,7 +22,7 @@ import {Grayscale} from 'react-native-image-filter-kit';
 
 import Boton from '../Componentes/Boton';
 
-import {initializeDatabase, handleSync, botonsubestaciones, handleSyncSub, fetchToken} from './services/database.service';
+import {initializeDatabase, handleSync, botonsubestaciones, handleSyncportodos, handleSyncSub, fetchToken} from './services/database.service';
 function Home({navigation}): JSX.Element {
   const [loadedImage, setLoadedImage] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -70,9 +70,10 @@ function Home({navigation}): JSX.Element {
           // Inicia la carga de las funciones
          
           await handleSync(generatedToken);
+          await handleSyncportodos(generatedToken);
           sincronizaCompletado = true;
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
-        } else {
+        } else { 
           sincronizaCompletado = true
           Alert.alert(
             'Servidor Caído',
@@ -80,7 +81,7 @@ function Home({navigation}): JSX.Element {
           );
           setLoading(false);
         }
-      } catch (error) {
+      } catch (error) { 
         sincronizaCompletado = true
         Alert.alert(
           'Servidor Caído',
@@ -139,7 +140,7 @@ function Home({navigation}): JSX.Element {
         nestedScrollEnabled={false} // Agrega esta línea para desactivar el desplazamiento
       >
         <View
-          style={{
+          style={{ 
             alignItems: 'center',
           }}>
           <View

@@ -153,7 +153,7 @@ export function getParametroFecha() {
         'SELECT * FROM parametrosqr WHERE nombre=?',
         ['ULT_ACT'],
         (_, {rows}) => {
-          // console.log("las consultas de select de la fecha", rows);
+          console.log("las consultas de select de la fecha de radiales ", rows);
           const registro = rows.item(0).VALOR;
 
           resolve(registro);
@@ -172,6 +172,8 @@ export function getParametroFechaSubestaciones() {
         'SELECT * FROM parametrosqrsubestaciones WHERE nombre=?',
         ['ULT_ACT'],
         (_, {rows}) => {
+          
+          console.log("las consultas de select de la fecha de SUBESTACIONES ", rows);
           const registro = rows.item(0).VALOR;
           resolve(registro);
         },
@@ -591,6 +593,8 @@ export const handleSync = async (generatedToken) => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
     let fecha_busqueda = await getParametroFecha();
+
+    console.log('fechas de radiales va',fecha_busqueda)
     // let fecha_busqueda = '2023-11-13 17:20:00';
    
     // console.log('la fecha actualizada busqueda', fecha_busqueda);
@@ -649,13 +653,24 @@ export const handleSync = async (generatedToken) => {
 
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  } catch (ex) {
+    console.error(ex);
+  }
+  // const fecha_busqueda = '2023-10-24 8:30:00';
+};
 
 
+
+// lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll]
+
+export const handleSyncportodos = async (generatedToken) => {
+  try {
 
 // // variables de datos 22222222222
-    let fecha_busqueda_subestacciones =  await getParametroFechaSubestaciones(  );
+    let fecha_busqueda_subestacciones =   await getParametroFechaSubestaciones(  );
 //  let fecha_busqueda_subestacciones = "";
+    
+console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
     
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
     
@@ -672,19 +687,19 @@ export const handleSync = async (generatedToken) => {
     }
     ///////////////LA FECHA DE SUBESTACIONES
     let fecha_subetaciones = data2.fecha;
+    console.log('las  fecha')
 
     if (fecha_subetaciones) {
-      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha);
+      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
       console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
 
 
-    /////////////////////////////////////////////////////////7
   } catch (ex) {
     console.error(ex);
   }
-  // const fecha_busqueda = '2023-10-24 8:30:00';
 };
+
 
 //por paramentro de fecha
 export const handleSyncSub = async (generatedToken) => {
