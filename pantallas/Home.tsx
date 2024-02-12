@@ -203,11 +203,11 @@ function Home({navigation}): JSX.Element {
                     onPress={() => navigation.push('BuscaSube')}
                     ></Boton>
 
-                      <Boton
+                      {/* <Boton
                     text="eleminar"
                     onPress={() =>  botonsubestaciones(token)}>
 
-                    </Boton>
+                    </Boton> */}
                 </View>
               )}
 
