@@ -1,78 +1,90 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, TouchableOpacity, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { searchSubestaciones } from './services/database.service';
-import debounce from 'lodash/debounce';
 
 const BuscaSube = () => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [searching, setSearching] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [pagination, setPagination] = useState({ page: 1, pageSize: 5 });
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    if (searchText !== '') {
-      handleSearchTextChange(searchText);
-    }
-  }, [pagination]); // Trigger search when pagination changes
-
-  const handleSearchTextChange = async (text) => {
-    setSearching(true);
-    try {
-      const results = await searchSubestaciones(text, pagination.page, pagination.pageSize);
-      if (pagination.page === 1) {
-        setSearchResults(results);
-      } else {
-        setSearchResults(prevResults => [...prevResults, ...results]);
-      }
-    } catch (error) {
-      console.error("Error al buscar subestaciones:", error);
-      Alert.alert("Error", "Ocurrió un error al buscar subestaciones. Por favor, inténtelo de nuevo.");
-    }
-    setSearching(false);
-  };
-
-  const handleSearchButtonPress = () => {
-    setPagination({ ...pagination, page: 1 });
-  };
-
-  const handleNextPage = () => {
-    setPagination(prevPagination => ({ ...prevPagination, page: prevPagination.page + 1 }));
-  };
-
-  const debouncedSearch = debounce(handleSearchTextChange, 300);
-
-  const loadMoreResults = async () => {
-    if (!loadingMore) {
-      setLoadingMore(true);
+  // const loadMoreResults = useCallback(async () => {
+  //   if (!loading && hasMore) {
+  //     setLoading(true);
+  //     try {
+  //       const results = await searchSubestaciones(searchText, page, 10); // Cargar 10 resultados por página
+  //       setSearchResults(prevResults => [...prevResults, ...results]);
+  //       setPage(prevPage => prevPage + 1);
+  //       setHasMore(results.length > 0);
+  //     } catch (error) {
+  //       console.error("Error al cargar más resultados:", error);
+  //       Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
+  //     }
+  //     setLoading(false);
+  //   }
+  // }, [loading, hasMore, page, searchText]);
+  const loadMoreResults = useCallback(async () => {
+    if (!loading && hasMore) {
+      setLoading(true);
       try {
-        const nextPageResults = await searchSubestaciones(searchText, pagination.page + 1, pagination.pageSize);
-        if (nextPageResults && nextPageResults.length > 0) {
-          setSearchResults(prevResults => [...prevResults, ...nextPageResults]);
-          setPagination(prevPagination => ({ ...prevPagination, page: prevPagination.page + 1 }));
-        } else {
-          // No hay más resultados disponibles
-          console.log('No hay más resultados disponibles.');
-        }
+        const results = await searchSubestaciones(searchText, page, 10); // Cargar 10 resultados por página
+        const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
+        setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
+        setPage(prevPage => prevPage + 1);
+        setHasMore(uniqueResults.length === 10); // Verificar si hay 10 resultados, si no, no hay más resultados disponibles
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
         Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
       }
-      setLoadingMore(false);
+      setLoading(false);
     }
+  }, [loading, hasMore, page, searchText, searchResults]);
+  
+  
+  useEffect(() => {
+    setSearchResults([]);
+    setPage(1);
+    setHasMore(true);
+    if (searchText.trim() !== '') {
+      loadMoreResults();
+    }
+  }, [searchText]);
+
+  const handleSearchTextChange = (text) => {
+    setSearchText(text);
   };
 
-  const paginatedResults = useMemo(() => {
-    const start = (pagination.page - 1) * pagination.pageSize;
-    const end = start + pagination.pageSize;
-    return searchResults.slice(start, end);
-  }, [pagination, searchResults]);
+  // const handleSearchButtonPress = () => {
+  //   setSearchResults([]);
+  //   setPage(1);
+  //   setHasMore(true);
+  //   loadMoreResults();
+  // };
 
-  const totalResults = searchResults.length;
-  const rangeStart = (pagination.page - 1) * pagination.pageSize + 1;
-  const rangeEnd = Math.min(rangeStart + pagination.pageSize - 1, totalResults);
+  const handleSearchButtonPress = () => {
+    setSearchResults([]); // Limpiar resultados anteriores
+    setPage(1);
+    setHasMore(true);
+    loadMoreResults();
+  };
+  const renderItem = ({ item }) => (
+    <View style={styles.resultItem}>
+      <Text style={styles.itemText}>{item.distrito}</Text>
+      <Text style={styles.itemText}>{item.direccion}</Text>
+      <Text style={styles.itemText}>{item.amt}</Text>
+      <Text style={styles.itemText}>{item.sed}</Text>
+    </View>
+  );
+
+  const renderFooter = () => {
+    if (!loading) return null;
+    return <ActivityIndicator size="small" color="#0000ff" />;
+  };
+
+  const keyExtractor = (item, index) => index.toString();
 
   return (
     <View style={styles.container}>
@@ -83,10 +95,7 @@ const BuscaSube = () => {
             style={styles.input}
             placeholder="Ingrese el término de búsqueda"
             value={searchText}
-            onChangeText={(text) => {
-              setSearchText(text);
-              debouncedSearch(text);
-            }}
+            onChangeText={handleSearchTextChange}
           />
           <TouchableOpacity
             style={styles.searchButton}
@@ -95,49 +104,19 @@ const BuscaSube = () => {
             <Text style={styles.searchButtonText}>Buscar</Text>
           </TouchableOpacity>
         </View>
-        {searching && <ActivityIndicator size="large" color="#0000ff" />}
+        {loading && <ActivityIndicator size="large" color="#0000ff" />}
       </View>
-      {searchResults && searchResults.length > 0 && (
-        <View style={styles.resultsContainer}>
-          <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
-          <View style={styles.resultHeader}>
-            <Text style={styles.headerText}>Distrito</Text>
-            <Text style={styles.headerText}>Dirección</Text>
-            <Text style={styles.headerText}>AMT</Text>
-            <Text style={styles.headerText}>SED</Text>
-          </View>
-          <FlatList
-            data={paginatedResults}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item }) => (
-              <View style={styles.resultItem}>
-                <Text style={styles.itemText}>{item.distrito}</Text>
-                <Text style={styles.itemText}>{item.direccion}</Text>
-                <Text style={styles.itemText}>{item.amt}</Text>
-                <Text style={styles.itemText}>{item.sed}</Text>
-              </View>
-            )}
-            onEndReached={loadMoreResults}
-            onEndReachedThreshold={0.1}
-            ListFooterComponent={() => (
-              <View>
-                {loadingMore && <ActivityIndicator size="small" color="#0000ff" />}
-                {totalResults > rangeEnd && (
-                  <TouchableOpacity
-                    style={styles.nextButton}
-                    onPress={handleNextPage}
-                  >
-                    <Text style={styles.nextButtonText}>Siguiente</Text>
-                  </TouchableOpacity>
-                )}
-                <Text style={styles.paginationInfo}>
-                  Mostrando {rangeStart} - {rangeEnd} de {totalResults} resultados
-                </Text>
-              </View>
-            )}
-          />
-        </View>
-      )}
+      <View style={styles.resultsContainer}>
+        <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
+        <FlatList
+          data={searchResults}
+          renderItem={renderItem}
+          keyExtractor={keyExtractor}
+          onEndReached={loadMoreResults}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={renderFooter}
+        />
+      </View>
     </View>
   );
 };
@@ -154,7 +133,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: 'black', // Color negro para el título
+    color: 'black',
   },
   searchContainer: {
     flexDirection: 'row',
@@ -168,7 +147,7 @@ const styles = StyleSheet.create({
     borderColor: 'black',
     paddingHorizontal: 10,
     marginRight: 10,
-    color: 'black', // Color negro para el texto ingresado
+    color: 'black',
   },
   searchButton: {
     backgroundColor: '#007bff',
@@ -186,21 +165,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: 'black', // Color negro para el título de los resultados
-  },
-  resultHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    paddingVertical: 10,
-    paddingHorizontal: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  headerText: {
-    flex: 1,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    color: 'black', // Color negro para el texto del encabezado
+    color: 'black',
   },
   resultItem: {
     flexDirection: 'row',
@@ -213,23 +178,8 @@ const styles = StyleSheet.create({
   itemText: {
     flex: 1,
     textAlign: 'center',
-    fontWeight: 'bold', // Texto en negrita para los datos de la tabla
-    color: 'black', // Color negro para el texto de los datos
-  },
-  paginationInfo: {
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  nextButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    alignSelf: 'center',
-    marginTop: 10,
-  },
-  nextButtonText: {
-    color: 'white',
+    fontWeight: 'bold',
+    color: 'black',
   },
 });
 

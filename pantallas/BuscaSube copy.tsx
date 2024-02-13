@@ -22,7 +22,11 @@ const BuscaSube = () => {
     setSearching(true);
     try {
       const results = await searchSubestaciones(text, pagination.page, pagination.pageSize);
-      setSearchResults(prevResults => pagination.page === 1 ? results : [...prevResults, ...results]);
+      if (pagination.page === 1) {
+        setSearchResults(results);
+      } else {
+        setSearchResults(prevResults => [...prevResults, ...results]);
+      }
     } catch (error) {
       console.error("Error al buscar subestaciones:", error);
       Alert.alert("Error", "Ocurrió un error al buscar subestaciones. Por favor, inténtelo de nuevo.");
@@ -32,6 +36,10 @@ const BuscaSube = () => {
 
   const handleSearchButtonPress = () => {
     setPagination({ ...pagination, page: 1 });
+  };
+
+  const handleNextPage = () => {
+    setPagination(prevPagination => ({ ...prevPagination, page: prevPagination.page + 1 }));
   };
 
   const debouncedSearch = debounce(handleSearchTextChange, 300);
@@ -61,6 +69,10 @@ const BuscaSube = () => {
     const end = start + pagination.pageSize;
     return searchResults.slice(start, end);
   }, [pagination, searchResults]);
+
+  const totalResults = searchResults.length;
+  const rangeStart = (pagination.page - 1) * pagination.pageSize + 1;
+  const rangeEnd = Math.min(rangeStart + pagination.pageSize - 1, totalResults);
 
   return (
     <View style={styles.container}>
@@ -110,6 +122,17 @@ const BuscaSube = () => {
             ListFooterComponent={() => (
               <View>
                 {loadingMore && <ActivityIndicator size="small" color="#0000ff" />}
+                {totalResults > rangeEnd && (
+                  <TouchableOpacity
+                    style={styles.nextButton}
+                    onPress={handleNextPage}
+                  >
+                    <Text style={styles.nextButtonText}>Siguiente</Text>
+                  </TouchableOpacity>
+                )}
+                <Text style={styles.paginationInfo}>
+                  Mostrando {rangeStart} - {rangeEnd} de {totalResults} resultados
+                </Text>
               </View>
             )}
           />
@@ -118,6 +141,7 @@ const BuscaSube = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -192,7 +216,21 @@ const styles = StyleSheet.create({
     fontWeight: 'bold', // Texto en negrita para los datos de la tabla
     color: 'black', // Color negro para el texto de los datos
   },
+  paginationInfo: {
+    textAlign: 'center',
+    marginTop: 10,
+  },
+  nextButton: {
+    backgroundColor: '#007bff',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 5,
+    alignSelf: 'center',
+    marginTop: 10,
+  },
+  nextButtonText: {
+    color: 'white',
+  },
 });
-
 
 export default BuscaSube;

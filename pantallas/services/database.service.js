@@ -988,8 +988,9 @@ export function searchSubestaciones(query) {
                   subestaciones.direccion,
                   subestaciones.amt,
                   subestaciones.sed
-                FROM subestaciones
-                WHERE
+                FROM subestaciones  
+
+                WHERE 
                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
