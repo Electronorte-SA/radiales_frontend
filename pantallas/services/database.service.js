@@ -594,7 +594,6 @@ export const handleSync = async (generatedToken) => {
     //  let exito_insertar = await insertBatchIntoDB(data);
     let fecha_busqueda = await getParametroFecha();
 
-    console.log('fechas de radiales va',fecha_busqueda)
     // let fecha_busqueda = '2023-11-13 17:20:00';
    
     // console.log('la fecha actualizada busqueda', fecha_busqueda);
@@ -603,41 +602,31 @@ export const handleSync = async (generatedToken) => {
 
     ///////////////////raduiales//////////////////////////////////////////////////////
     if (data) {
-      console.log('paso 1', fecha_busqueda);
       if (fecha_busqueda === '') {
-        console.log('paso 2');
         if (data.radiales) {
-          console.log('paso 3');
           let exito_insertar = await insertRadiales(data.radiales);
           console.log('subestaciones con existos de boton en insertado', exito_insertar_subestsacionnes);
         }
       } else {
         if (data) {
-          console.log('paso 4');
           if (data.radiales) {
-            console.log('paso 5');
             let dataInsertar = data.radiales.filter(
               item => (item.accion = 'insertar'),
             );
 
-            console.log('paso 6');
             let dataActualizar = data.radiales.filter(
               item => (item.accion = 'actualizar'),
             );
 
-            console.log('paso 7');
             if (dataInsertar) {
               let exito_insertar = await insertRadiales(dataInsertar);
 
               // console.log('datos isertados por la fecha',exito_insertar)
             }
 
-            console.log('paso 8');
             if (dataActualizar) {
               let exito_actualizar = await updateRadiales(dataActualizar);
-              console.log('paso 9');
-              console.log('datos autilizado por la fecha', exito_actualizar);
-            }
+                 }
           }
         }
       }
@@ -670,7 +659,7 @@ export const handleSyncportodos = async (generatedToken) => {
     let fecha_busqueda_subestacciones =   await getParametroFechaSubestaciones(  );
 //  let fecha_busqueda_subestacciones = "";
     
-console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
+// console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
     
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
     
@@ -687,11 +676,9 @@ console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
     }
     ///////////////LA FECHA DE SUBESTACIONES
     let fecha_subetaciones = data2.fecha;
-    console.log('las  fecha')
-
     if (fecha_subetaciones) {
       let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
-      console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
+      // console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
 
 
@@ -850,7 +837,6 @@ export const eliminarDatosSubestaciones = () => {
 
 export const botonsubestaciones = async (generatedToken) => {
   try {
-    console.log('general las subestaciones')
     // const data = await fetchSubestacionesDataSync(generatedToken);
     const data = await  eliminarDatosSubestaciones();
     // Aquí puedes realizar cualquier acción adicional con los datos obtenidos, como eliminarlos de la base de datos local
@@ -1011,6 +997,7 @@ export function searchSubestaciones(query) {
                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
     sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
   } else {
+    console.log('consulta query', searchTerm)
     // Caso 4: Palabra exacta con al menos 3 caracteres
     sqlQuery = `SELECT
                   subestaciones.distrito,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, TouchableOpacity, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { searchSubestaciones } from './services/database.service';
 
@@ -11,21 +11,6 @@ const BuscaSube = () => {
   const [hasMore, setHasMore] = useState(true);
   const navigation = useNavigation();
 
-  // const loadMoreResults = useCallback(async () => {
-  //   if (!loading && hasMore) {
-  //     setLoading(true);
-  //     try {
-  //       const results = await searchSubestaciones(searchText, page, 10); // Cargar 10 resultados por página
-  //       setSearchResults(prevResults => [...prevResults, ...results]);
-  //       setPage(prevPage => prevPage + 1);
-  //       setHasMore(results.length > 0);
-  //     } catch (error) {
-  //       console.error("Error al cargar más resultados:", error);
-  //       Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
-  //     }
-  //     setLoading(false);
-  //   }
-  // }, [loading, hasMore, page, searchText]);
   const loadMoreResults = useCallback(async () => {
     if (!loading && hasMore) {
       setLoading(true);
@@ -49,7 +34,9 @@ const BuscaSube = () => {
     setPage(1);
     setHasMore(true);
     if (searchText.trim() !== '') {
+      console.log('buscando', searchText)
       loadMoreResults();
+
     }
   }, [searchText]);
 
@@ -57,19 +44,6 @@ const BuscaSube = () => {
     setSearchText(text);
   };
 
-  // const handleSearchButtonPress = () => {
-  //   setSearchResults([]);
-  //   setPage(1);
-  //   setHasMore(true);
-  //   loadMoreResults();
-  // };
-
-  const handleSearchButtonPress = () => {
-    setSearchResults([]); // Limpiar resultados anteriores
-    setPage(1);
-    setHasMore(true);
-    loadMoreResults();
-  };
   const renderItem = ({ item }) => (
     <View style={styles.resultItem}>
       <Text style={styles.itemText}>{item.distrito}</Text>
@@ -97,12 +71,6 @@ const BuscaSube = () => {
             value={searchText}
             onChangeText={handleSearchTextChange}
           />
-          <TouchableOpacity
-            style={styles.searchButton}
-            onPress={handleSearchButtonPress}
-          >
-            <Text style={styles.searchButtonText}>Buscar</Text>
-          </TouchableOpacity>
         </View>
         {loading && <ActivityIndicator size="large" color="#0000ff" />}
       </View>
@@ -136,27 +104,14 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
     marginBottom: 10,
   },
   input: {
-    flex: 1,
     height: 40,
     borderWidth: 1,
     borderColor: 'black',
     paddingHorizontal: 10,
-    marginRight: 10,
     color: 'black',
-  },
-  searchButton: {
-    backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  searchButtonText: {
-    color: 'white',
   },
   resultsContainer: {
     flex: 1,

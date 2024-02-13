@@ -61,7 +61,7 @@ function Home({navigation}): JSX.Element {
     const sincroniza = async () => {
       try {
         const response = await fetch('https://radialesqr.azurewebsites.net');
-        console.log('response', response);
+        // console.log('response', response);
         sincronizaCompletado = false
         if (response.ok) {
           let generatedToken = await fetchToken();
