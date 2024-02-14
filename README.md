@@ -19,3 +19,8 @@ Correr en iOS
 ```
 npx react-native run-ios
 ```
+
+Generar el apk
+```
+.\gradlew assemblerelease
+```
