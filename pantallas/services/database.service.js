@@ -853,95 +853,6 @@ export const botonsubestaciones = async (generatedToken) => {
 ///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
 
 
-// export function searchSubestaciones(query) {
-//   let searchTerm = query.trim();
-//   let sqlQuery;
-//   let sqlParams = [];
-
-//   // Verificar si el término de búsqueda tiene al menos 3 caracteres
-//   if (searchTerm.length < 3 && searchTerm.indexOf('%') === -1) {
-//     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
-//     return Promise.resolve([]);
-//   }
-
-//   if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-//     // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
-//   } else if (searchTerm.startsWith('%')) {
-//     // Caso 1: Palabra que termina con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-//   } else if (searchTerm.endsWith('%')) {
-//     // Caso 2: Palabra que comienza con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
-//   } else {
-//     // Caso 4: Palabra exacta (más de 3 caracteres)
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.distrito) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.direccion) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.amt) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.sed) = UPPER(?))`;
-//     sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
-//   }
-
-//   return new Promise((resolve, reject) => {
-//     db.transaction(tx => {
-//       tx.executeSql(
-//         sqlQuery,
-//         sqlParams,
-//         (_, { rows }) => {
-//           const results = [];
-//           for (let i = 0; i < rows.length; i++) {
-//             results.push(rows.item(i));
-//           }
-//           console.log('Resultados:', results);
-//           resolve(results);
-//         },
-//         (_, error) => {
-//           reject(error);
-//         }
-//       );
-//     });
-//   });
-// }
 export function searchSubestaciones(query) {
   let searchTerm = query.trim();
   let sqlQuery;
@@ -959,60 +870,66 @@ export function searchSubestaciones(query) {
                   subestaciones.distrito,
                   subestaciones.direccion,
                   subestaciones.amt,
-                  subestaciones.sed
+                  subestaciones.sed,
+                  subestaciones.id
                 FROM subestaciones
                 WHERE
                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
+                UPPER(subestaciones.id) LIKE UPPER(?) OR
                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
+    sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
   } else if (searchTerm.startsWith('%')) {
     // Caso 1: Palabra que termina con el término de búsqueda
     sqlQuery = `SELECT
                   subestaciones.distrito,
                   subestaciones.direccion,
                   subestaciones.amt,
-                  subestaciones.sed
+                  subestaciones.sed,
+                  subestaciones.id
                 FROM subestaciones  
-
                 WHERE 
                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
+                UPPER(subestaciones.sed) LIKE UPPER(?) OR
+                UPPER(subestaciones.id) LIKE UPPER(?)`;
+    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
   } else if (searchTerm.endsWith('%')) {
     // Caso 2: Palabra que comienza con el término de búsqueda
     sqlQuery = `SELECT
                   subestaciones.distrito,
                   subestaciones.direccion,
                   subestaciones.amt,
-                  subestaciones.sed
+                  subestaciones.sed,
+                  subestaciones.id
                 FROM subestaciones
                 WHERE
                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
+                UPPER(subestaciones.sed) LIKE UPPER(?) OR
+                UPPER(subestaciones.id) LIKE UPPER(?)`;
+    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
   } else {
-    console.log('consulta query', searchTerm)
     // Caso 4: Palabra exacta con al menos 3 caracteres
     sqlQuery = `SELECT
                   subestaciones.distrito,
                   subestaciones.direccion,
                   subestaciones.amt,
-                  subestaciones.sed
+                  subestaciones.sed,
+                  subestaciones.id
                 FROM subestaciones
                 WHERE
                 LENGTH(?) >= 3 AND (
                   UPPER(subestaciones.distrito) LIKE UPPER(?) OR
                   UPPER(subestaciones.direccion) LIKE UPPER(?) OR
                   UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                  UPPER(subestaciones.sed) LIKE UPPER(?)
+                  UPPER(subestaciones.sed) LIKE UPPER(?) OR
+                  UPPER(subestaciones.id) LIKE UPPER(?)
                 )`;
-    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
   }
 
   return new Promise((resolve, reject) => {
@@ -1025,7 +942,7 @@ export function searchSubestaciones(query) {
           for (let i = 0; i < rows.length; i++) {
             results.push(rows.item(i));
           }
-          console.log('Resultados:', results);
+          // console.log('Resultados:', results);
           resolve(results);
         },
         (_, error) => {
@@ -1037,4 +954,78 @@ export function searchSubestaciones(query) {
 }
 
 
+// export function searchSubestacionById(id) {
+//   let sqlQuery = `SELECT
+//                     subestaciones.provincia,
+//                     subestaciones.distrito,
+//                     subestaciones.direccion,
+//                     subestaciones.u_negocio,
+//                     subestaciones.amt,
+//                     subestaciones.sed,
+//                     subestaciones.fecha_instalacion, 
+//                     subestaciones.tipo,
+//                     subestaciones.propietario,
+//                     subestaciones.coordenadas,
+//                     subestaciones.transformador
+//                   FROM subestaciones
+//                   WHERE subestaciones.id = ?`;
+//   let sqlParams = [id];
+
+//   return new Promise((resolve, reject) => {
+//     db.transaction(tx => {
+//       tx.executeSql(
+//         sqlQuery,
+//         sqlParams,
+//         (_, { rows }) => {
+//           const results = [];
+//           for (let i = 0; i < rows.length; i++) {
+//             results.push(rows.item(i));
+//           }
+//           console.log('Resultados de los detaller:', results);
+//           resolve(results);
+//         },
+//         (_, error) => {
+//           reject(error);
+//         }
+//       );
+//     });
+//   });
+// }
+export function searchSubestacionById(id) {
+  let sqlQuery = `SELECT
+                    subestaciones.provincia,
+                    subestaciones.distrito,
+                    subestaciones.direccion,
+                    subestaciones.u_negocio,
+                    subestaciones.amt,
+                    subestaciones.sed,
+                    subestaciones.fecha_instalacion, 
+                    subestaciones.tipo,
+                    subestaciones.propietario,
+                    subestaciones.coordenadas,
+                    subestaciones.transformador
+                  FROM subestaciones
+                  WHERE subestaciones.id = ?`;
+  let sqlParams = [id];
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        sqlQuery,
+        sqlParams,
+        (_, { rows }) => {
+          const results = [];
+          for (let i = 0; i < rows.length; i++) {
+            results.push(rows.item(i)); // Cambia esto a results.push(rows._array[i]);
+          }
+          console.log('Resultados de los detaller:', results);
+          resolve(results);
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+}
 

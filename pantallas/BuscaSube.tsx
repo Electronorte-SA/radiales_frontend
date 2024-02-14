@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native'; // Importa TouchableOpacity
 import { useNavigation } from '@react-navigation/native';
-import { searchSubestaciones } from './services/database.service';
+import { searchSubestaciones, searchSubestacionById } from './services/database.service';
 
 const BuscaSube = () => {
   const [searchText, setSearchText] = useState('');
@@ -34,15 +34,25 @@ const BuscaSube = () => {
     setPage(1);
     setHasMore(true);
     if (searchText.trim() !== '') {
-      console.log('buscando', searchText)
       loadMoreResults();
-
     }
   }, [searchText]);
 
   const handleSearchTextChange = (text) => {
     setSearchText(text);
   };
+  const handleGoButtonClick = async (id) => {
+    try {
+        const results = await searchSubestacionById(id);
+        console.log('los resultadoo segun el id que seleccionado', results)
+        // Navegar a la pantalla de detalles y pasar los resultados como parámetro
+        navigation.navigate('Verdetaller', { id: id }); // Pasar el ID en lugar de los resultados
+
+    } catch (error) {
+        console.error('Error al buscar los datos:', error);
+        Alert.alert('Error', 'Hubo un error al buscar los datos. Por favor, inténtalo de nuevo.');
+    }
+};
 
   const renderItem = ({ item }) => (
     <View style={styles.resultItem}>
@@ -50,9 +60,12 @@ const BuscaSube = () => {
       <Text style={styles.itemText}>{item.direccion}</Text>
       <Text style={styles.itemText}>{item.amt}</Text>
       <Text style={styles.itemText}>{item.sed}</Text>
+      <TouchableOpacity onPress={() => handleGoButtonClick(item.id)} style={styles.buttonContainer}>
+        <Text style={styles.buttonText}>Ir</Text>
+      </TouchableOpacity>
     </View>
   );
-
+  
   const renderFooter = () => {
     if (!loading) return null;
     return <ActivityIndicator size="small" color="#0000ff" />;
@@ -135,6 +148,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: 'bold',
     color: 'black',
+  },
+  buttonText: {
+    color: 'blue', // Cambia el color del texto del botón
   },
 });
 
