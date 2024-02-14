@@ -70,8 +70,8 @@ export const initializeDatabase = () => {
     tx.executeSql(
       'CREATE TABLE IF NOT EXISTS subestaciones (' +
         'id INTEGER PRIMARY KEY AUTOINCREMENT, ' +
-        'provincia TEXT, ' +  
-        'distrito TEXT, ' + //estte
+        'provincia TEXT, ' +
+        'distrito TEXT, ' +
         'direccion TEXT, ' + //este columna vamos a trabaja en las busquedad
         'u_negocio TEXT, ' +
         'amt TEXT, ' +  //este columna vamos a trabaja en las busquedad
@@ -123,7 +123,7 @@ export const initializeDatabase = () => {
       'SELECT * FROM parametrosqr',
       [],
       (_, result) => {
-        console.log('los datos de la consulta', result);
+        // console.log('los datos de la consulta', result);
         const rows = result.rows;
         for (let i = 0; i < rows.length; i++) {
           const item = rows.item(i);
@@ -153,7 +153,7 @@ export function getParametroFecha() {
         'SELECT * FROM parametrosqr WHERE nombre=?',
         ['ULT_ACT'],
         (_, {rows}) => {
-          console.log("las consultas de select de la fecha de radiales ", rows);
+          // console.log("las consultas de select de la fecha", rows);
           const registro = rows.item(0).VALOR;
 
           resolve(registro);
@@ -172,8 +172,6 @@ export function getParametroFechaSubestaciones() {
         'SELECT * FROM parametrosqrsubestaciones WHERE nombre=?',
         ['ULT_ACT'],
         (_, {rows}) => {
-          
-          console.log("las consultas de select de la fecha de SUBESTACIONES ", rows);
           const registro = rows.item(0).VALOR;
           resolve(registro);
         },
@@ -593,7 +591,6 @@ export const handleSync = async (generatedToken) => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
     let fecha_busqueda = await getParametroFecha();
-
     // let fecha_busqueda = '2023-11-13 17:20:00';
    
     // console.log('la fecha actualizada busqueda', fecha_busqueda);
@@ -602,31 +599,41 @@ export const handleSync = async (generatedToken) => {
 
     ///////////////////raduiales//////////////////////////////////////////////////////
     if (data) {
+      console.log('paso 1', fecha_busqueda);
       if (fecha_busqueda === '') {
+        console.log('paso 2');
         if (data.radiales) {
+          console.log('paso 3');
           let exito_insertar = await insertRadiales(data.radiales);
           console.log('subestaciones con existos de boton en insertado', exito_insertar_subestsacionnes);
         }
       } else {
         if (data) {
+          console.log('paso 4');
           if (data.radiales) {
+            console.log('paso 5');
             let dataInsertar = data.radiales.filter(
               item => (item.accion = 'insertar'),
             );
 
+            console.log('paso 6');
             let dataActualizar = data.radiales.filter(
               item => (item.accion = 'actualizar'),
             );
 
+            console.log('paso 7');
             if (dataInsertar) {
               let exito_insertar = await insertRadiales(dataInsertar);
 
               // console.log('datos isertados por la fecha',exito_insertar)
             }
 
+            console.log('paso 8');
             if (dataActualizar) {
               let exito_actualizar = await updateRadiales(dataActualizar);
-                 }
+              console.log('paso 9');
+              console.log('datos autilizado por la fecha', exito_actualizar);
+            }
           }
         }
       }
@@ -642,24 +649,13 @@ export const handleSync = async (generatedToken) => {
 
 
 
-  } catch (ex) {
-    console.error(ex);
-  }
-  // const fecha_busqueda = '2023-10-24 8:30:00';
-};
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
-
-// lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll]
-
-export const handleSyncportodos = async (generatedToken) => {
-  try {
 
 // // variables de datos 22222222222
-    let fecha_busqueda_subestacciones =   await getParametroFechaSubestaciones(  );
+    let fecha_busqueda_subestacciones =  await getParametroFechaSubestaciones(  );
 //  let fecha_busqueda_subestacciones = "";
-    
-// console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
     
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
     
@@ -676,17 +672,19 @@ export const handleSyncportodos = async (generatedToken) => {
     }
     ///////////////LA FECHA DE SUBESTACIONES
     let fecha_subetaciones = data2.fecha;
+
     if (fecha_subetaciones) {
-      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
-      // console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
+      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha);
+      console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
 
 
+    /////////////////////////////////////////////////////////7
   } catch (ex) {
     console.error(ex);
   }
+  // const fecha_busqueda = '2023-10-24 8:30:00';
 };
-
 
 //por paramentro de fecha
 export const handleSyncSub = async (generatedToken) => {
@@ -837,6 +835,7 @@ export const eliminarDatosSubestaciones = () => {
 
 export const botonsubestaciones = async (generatedToken) => {
   try {
+    console.log('general las subestaciones')
     // const data = await fetchSubestacionesDataSync(generatedToken);
     const data = await  eliminarDatosSubestaciones();
     // Aquí puedes realizar cualquier acción adicional con los datos obtenidos, como eliminarlos de la base de datos local
@@ -851,88 +850,25 @@ export const botonsubestaciones = async (generatedToken) => {
 
 
 ///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
-
-
 // export function searchSubestaciones(query) {
-//   let searchTerm = query.trim();
-//   let sqlQuery;
-//   let sqlParams = [];
-
-//   // Verificar si el término de búsqueda tiene al menos 3 caracteres
-//   if (searchTerm.length < 3 && searchTerm.indexOf('%') === -1) {
-//     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
-//     return Promise.resolve([]);
-//   }
-
-//   if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-//     // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
-//   } else if (searchTerm.startsWith('%')) {
-//     // Caso 1: Palabra que termina con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-//   } else if (searchTerm.endsWith('%')) {
-//     // Caso 2: Palabra que comienza con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
-//                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-//     sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
-//   } else {
-//     // Caso 4: Palabra exacta (más de 3 caracteres)
-//     sqlQuery = `SELECT
-//                   subestaciones.distrito,
-//                   subestaciones.direccion,
-//                   subestaciones.amt,
-//                   subestaciones.sed
-//                 FROM subestaciones
-//                 WHERE
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.distrito) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.direccion) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.amt) = UPPER(?)) OR
-//                 (LENGTH(?) >= 3 AND UPPER(subestaciones.sed) = UPPER(?))`;
-//     sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
-//   }
-
+//   // console.log('el imputttt ',query)
 //   return new Promise((resolve, reject) => {
 //     db.transaction(tx => {
 //       tx.executeSql(
-//         sqlQuery,
-//         sqlParams,
+//         `SELECT
+//           subestaciones.direccion,
+//           subestaciones.amt,
+//           subestaciones.sed
+//         FROM subestaciones
+//         WHERE
+//         UPPER(subestaciones.direccion) LIKE UPPER(?) OR
+//         UPPER(subestaciones.amt) LIKE UPPER(?) OR
+//         UPPER(subestaciones.sed) LIKE UPPER(?)`,
+//         [`%${query}%`, `%${query}%`, `%${query}%`],
 //         (_, { rows }) => {
-//           const results = [];
-//           for (let i = 0; i < rows.length; i++) {
-//             results.push(rows.item(i));
-//           }
-//           console.log('Resultados:', results);
+//         console.log('los rows',rows)
+//           const results = rows._array;
+//           console.log('los datos de la consulta', results)
 //           resolve(results);
 //         },
 //         (_, error) => {
@@ -943,83 +879,20 @@ export const botonsubestaciones = async (generatedToken) => {
 //   });
 // }
 export function searchSubestaciones(query) {
-  let searchTerm = query.trim();
-  let sqlQuery;
-  let sqlParams = [];
-
-  // Verificar si el término de búsqueda tiene al menos 3 caracteres
-  if (searchTerm.length < 3) {
-    console.log('El término de búsqueda debe tener al menos 3 caracteres.');
-    return Promise.resolve([]);
-  }
-
-  if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-    // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed
-                FROM subestaciones
-                WHERE
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
-  } else if (searchTerm.startsWith('%')) {
-    // Caso 1: Palabra que termina con el término de búsqueda
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed
-                FROM subestaciones  
-
-                WHERE 
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-  } else if (searchTerm.endsWith('%')) {
-    // Caso 2: Palabra que comienza con el término de búsqueda
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed
-                FROM subestaciones
-                WHERE
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
-  } else {
-    console.log('consulta query', searchTerm)
-    // Caso 4: Palabra exacta con al menos 3 caracteres
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed
-                FROM subestaciones
-                WHERE
-                LENGTH(?) >= 3 AND (
-                  UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                  UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                  UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                  UPPER(subestaciones.sed) LIKE UPPER(?)
-                )`;
-    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
-  }
-
+  // console.log('el imputttt ',query)
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
-        sqlQuery,
-        sqlParams,
+        `SELECT
+          subestaciones.direccion,
+          subestaciones.amt,
+          subestaciones.sed
+        FROM subestaciones
+        WHERE
+        UPPER(subestaciones.direccion) LIKE UPPER(?) OR
+        UPPER(subestaciones.amt) LIKE UPPER(?) OR
+        UPPER(subestaciones.sed) LIKE UPPER(?)`,
+        [`%${query}%`, `%${query}%`, `%${query}%`],
         (_, { rows }) => {
           const results = [];
           for (let i = 0; i < rows.length; i++) {
@@ -1035,6 +908,4 @@ export function searchSubestaciones(query) {
     });
   });
 }
-
-
 
