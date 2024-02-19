@@ -61,7 +61,7 @@ const BuscaSube = () => {
       <Text style={styles.itemText}>{item.amt}</Text>
       <Text style={styles.itemText}>{item.sed}</Text>
       <TouchableOpacity onPress={() => handleGoButtonClick(item.id)} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>Ir</Text>
+        <Text style={styles.buttonText}>VER MAS </Text>
       </TouchableOpacity>
     </View>
   );

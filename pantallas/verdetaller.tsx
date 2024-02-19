@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, FlatList, Button } from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator, FlatList, Button, Linking } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { searchSubestacionById } from './services/database.service';
+import Geolocation from '@react-native-community/geolocation'; // Importar Geolocation desde '@react-native-community/geolocation'
 
 const Verdetaller = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [userLocation, setUserLocation] = useState(null); // Estado para almacenar la ubicación del usuario
   const route = useRoute();
   const navigation = useNavigation();
 
@@ -27,8 +29,45 @@ const Verdetaller = () => {
 
   }, [route.params]);
 
+  useEffect(() => {
+    // Función para obtener la ubicación actual del usuario
+    const fetchUserLocation = () => {
+      Geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          });
+        },
+        (error) => {
+          console.error('Error al obtener la ubicación del usuario:', error);
+        },
+        { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+      );
+    };
+
+    // Llamar a la función para obtener la ubicación actual del usuario
+    fetchUserLocation();
+  }, []); // Solo se ejecuta una vez al montar el componente
+
   const handleGoToGPSRutas = (coordenadas) => {
-    navigation.navigate('GPSRutas', { coordenadas });
+    if (userLocation) {
+      // Obtener las coordenadas del usuario
+      const { latitude: userLatitude, longitude: userLongitude } = userLocation;
+
+
+      // Obtener las coordenadas del destino
+      const [ destLatitude, destLongitude ] = coordenadas.split(",");
+
+
+      // Generar la URL de Google Maps con las coordenadas del usuario y del destino
+      const googleMapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${userLatitude},${userLongitude}&destination=${destLatitude},${destLongitude}`;
+
+      // Abrir Google Maps con las coordenadas proporcionadas
+      Linking.openURL(googleMapsUrl);
+    } else {
+      console.log('No se pudo obtener la ubicación del usuario.');
+    }
   };
 
   return (

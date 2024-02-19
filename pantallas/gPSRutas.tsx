@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, PermissionsAndroid } from 'react-native';
 import MapView, { Polyline } from 'react-native-maps';
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation from 'react-native-get-location';
 
 const GPSRutas = ({ route }) => {
   const [userLocation, setUserLocation] = useState(null);
@@ -24,19 +24,15 @@ const GPSRutas = ({ route }) => {
           throw new Error('Permiso de ubicación denegado');
         }
 
-        Geolocation.getCurrentPosition(
-          (position) => {
-            setUserLocation({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            });
-          },
-          (error) => {
-            console.error('Error al obtener la ubicación del usuario:', error);
-            setError(error.message);
-          },
-          { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-        );
+        const location = await Geolocation.getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000,
+        });
+
+        setUserLocation({
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
       } catch (error) {
         console.error('Error al obtener la ubicación del usuario:', error);
         setError(error.message);
@@ -59,6 +55,7 @@ const GPSRutas = ({ route }) => {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
           }}
+          provider={MapView.PROVIDER_GOOGLE} // Usar proveedor de Google Maps
         >
           {destinationCoordinates && (
             <Polyline

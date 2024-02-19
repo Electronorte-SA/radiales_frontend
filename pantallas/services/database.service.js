@@ -605,7 +605,7 @@ export const handleSync = async (generatedToken) => {
       if (fecha_busqueda === '') {
         if (data.radiales) {
           let exito_insertar = await insertRadiales(data.radiales);
-          console.log('subestaciones con existos de boton en insertado', exito_insertar_subestsacionnes);
+          console.log('subestaciones con existos de boton en insertado', exito_insertar);
         }
       } else {
         if (data) {
@@ -853,6 +853,7 @@ export const botonsubestaciones = async (generatedToken) => {
 ///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
 
 
+
 export function searchSubestaciones(query) {
   let searchTerm = query.trim();
   let sqlQuery;
@@ -862,6 +863,14 @@ export function searchSubestaciones(query) {
   if (searchTerm.length < 3) {
     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
     return Promise.resolve([]);
+  }
+
+  // Verificar y manejar los caracteres especiales
+  if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
+    searchTerm = searchTerm.slice(1);
+  }
+  if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
+    searchTerm = searchTerm.slice(0, -1);
   }
 
   if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
@@ -879,7 +888,7 @@ export function searchSubestaciones(query) {
                 UPPER(subestaciones.amt) LIKE UPPER(?) OR
                 UPPER(subestaciones.id) LIKE UPPER(?) OR
                 UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`, `%${searchTerm.slice(1, -1)}%`];
+    sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
   } else if (searchTerm.startsWith('%')) {
     // Caso 1: Palabra que termina con el término de búsqueda
     sqlQuery = `SELECT
@@ -953,44 +962,6 @@ export function searchSubestaciones(query) {
   });
 }
 
-
-// export function searchSubestacionById(id) {
-//   let sqlQuery = `SELECT
-//                     subestaciones.provincia,
-//                     subestaciones.distrito,
-//                     subestaciones.direccion,
-//                     subestaciones.u_negocio,
-//                     subestaciones.amt,
-//                     subestaciones.sed,
-//                     subestaciones.fecha_instalacion, 
-//                     subestaciones.tipo,
-//                     subestaciones.propietario,
-//                     subestaciones.coordenadas,
-//                     subestaciones.transformador
-//                   FROM subestaciones
-//                   WHERE subestaciones.id = ?`;
-//   let sqlParams = [id];
-
-//   return new Promise((resolve, reject) => {
-//     db.transaction(tx => {
-//       tx.executeSql(
-//         sqlQuery,
-//         sqlParams,
-//         (_, { rows }) => {
-//           const results = [];
-//           for (let i = 0; i < rows.length; i++) {
-//             results.push(rows.item(i));
-//           }
-//           console.log('Resultados de los detaller:', results);
-//           resolve(results);
-//         },
-//         (_, error) => {
-//           reject(error);
-//         }
-//       );
-//     });
-//   });
-// }
 export function searchSubestacionById(id) {
   let sqlQuery = `SELECT
                     subestaciones.provincia,
