@@ -28,7 +28,7 @@ interface FormData {
   fec_camb_bateria: string;
 }
 const BuscarId: React.FC<QRGenProps> = ({ navigation }) => {
-  const [inputID, setInputID] = useState("I200783");
+  const [inputID, setInputID] = useState("");
   const [scanned, setScanned] = useState<boolean>(false);
   const [formData, setFormData] = useState<FormData>({
     codigo: '',

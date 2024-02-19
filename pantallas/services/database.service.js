@@ -860,7 +860,7 @@ export function searchSubestaciones(query) {
   let sqlParams = [];
 
   // Verificar si el término de búsqueda tiene al menos 3 caracteres
-  if (searchTerm.length < 3) {
+  if (searchTerm.length < 2) {
     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
     return Promise.resolve([]);
   }
