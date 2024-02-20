@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native'; // Importa TouchableOpacity
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { searchSubestaciones, searchSubestacionById } from './services/database.service';
 
@@ -15,11 +15,11 @@ const BuscaSube = () => {
     if (!loading && hasMore) {
       setLoading(true);
       try {
-        const results = await searchSubestaciones(searchText, page, 10); // Cargar 10 resultados por página
+        const results = await searchSubestaciones(searchText, page, 10);
         const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
         setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
         setPage(prevPage => prevPage + 1);
-        setHasMore(uniqueResults.length === 10); // Verificar si hay 10 resultados, si no, no hay más resultados disponibles
+        setHasMore(uniqueResults.length === 10);
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
         Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
@@ -41,18 +41,26 @@ const BuscaSube = () => {
   const handleSearchTextChange = (text) => {
     setSearchText(text);
   };
+
   const handleGoButtonClick = async (id) => {
     try {
-        const results = await searchSubestacionById(id);
-        console.log('los resultadoo segun el id que seleccionado', results)
-        // Navegar a la pantalla de detalles y pasar los resultados como parámetro
-        navigation.navigate('Verdetaller', { id: id }); // Pasar el ID en lugar de los resultados
-
+      const results = await searchSubestacionById(id);
+      navigation.navigate('Verdetaller', { id: id });
     } catch (error) {
-        console.error('Error al buscar los datos:', error);
-        Alert.alert('Error', 'Hubo un error al buscar los datos. Por favor, inténtalo de nuevo.');
+      console.error('Error al buscar los datos:', error);
+      Alert.alert('Error', 'Hubo un error al buscar los datos. Por favor, inténtalo de nuevo.');
     }
-};
+  };
+
+  const renderHeader = () => (
+    <View style={styles.resultItem}>
+      <Text style={styles.itemText}>Distrito</Text>
+      <Text style={styles.itemText}>Dirección</Text>
+      <Text style={styles.itemText}>AMT</Text>
+      <Text style={styles.itemText}>SED</Text>
+      <Text style={styles.itemText}>Acción</Text>
+    </View>
+  );
 
   const renderItem = ({ item }) => (
     <View style={styles.resultItem}>
@@ -61,7 +69,7 @@ const BuscaSube = () => {
       <Text style={styles.itemText}>{item.amt}</Text>
       <Text style={styles.itemText}>{item.sed}</Text>
       <TouchableOpacity onPress={() => handleGoButtonClick(item.id)} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>VER MAS </Text>
+        <Text style={styles.buttonText}>VER MAS</Text>
       </TouchableOpacity>
     </View>
   );
@@ -90,7 +98,8 @@ const BuscaSube = () => {
       <View style={styles.resultsContainer}>
         <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
         <FlatList
-          data={searchResults}
+          data={searchResults.slice(0, 5)} // Limita la visualización a 5 resultados
+          ListHeaderComponent={renderHeader} // Agrega el encabezado de la tabla
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           onEndReached={loadMoreResults}
@@ -150,7 +159,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   buttonText: {
-    color: 'blue', // Cambia el color del texto del botón
+    color: 'blue',
   },
 });
 

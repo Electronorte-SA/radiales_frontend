@@ -46,7 +46,7 @@ function App(): JSX.Element {
     
 
         <Stack.Screen name="Camara" component={Camara} />
-        <Stack.Screen name="buscar_rad" component={buscarRadiales} />
+        <Stack.Screen name="buscar_rdl" component={buscarRadiales} />
         <Stack.Screen name="Buscar_Sub" component={BuscaSube} />
         <Stack.Screen name="Verdetaller" component={Verdetaller} />
         <Stack.Screen name="DetalleRadiales" component={DetalleRadiales} />

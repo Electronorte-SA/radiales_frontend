@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native'; // Importa TouchableOpacity
+import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { searchRadialesQR } from './services/database.service';
-import {  searchRadialById } from './services/database.service';
+import { searchRadialById } from './services/database.service';
 
 const BuscarRadiales = () => {
   const [searchText, setSearchText] = useState('');
@@ -16,11 +16,11 @@ const BuscarRadiales = () => {
     if (!loading && hasMore) {
       setLoading(true);
       try {
-        const results = await searchRadialesQR(searchText, page, 10); // Cargar 10 resultados por página
+        const results = await searchRadialesQR(searchText, page, 10);
         const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
         setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
         setPage(prevPage => prevPage + 1);
-        setHasMore(uniqueResults.length === 10); // Verificar si hay 10 resultados, si no, no hay más resultados disponibles
+        setHasMore(uniqueResults.length === 10);
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
         Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
@@ -28,8 +28,7 @@ const BuscarRadiales = () => {
       setLoading(false);
     }
   }, [loading, hasMore, page, searchText, searchResults]);
-  
-  
+
   useEffect(() => {
     setSearchResults([]);
     setPage(1);
@@ -42,20 +41,26 @@ const BuscarRadiales = () => {
   const handleSearchTextChange = (text) => {
     setSearchText(text);
   };
+
   const handleGoButtonClick = async (id) => {
     try {
-        console.log('los id de ', id)
-        // Aquí puedes implementar la lógica para manejar el clic en el botón VER MAS
-        const resultsRA = await  searchRadialById(id);
-        console.log('los resultadoo segun el id radia,es ', resultsRA)
-        // Navegar a la pantalla de detalles y pasar los resultados como parámetro
-        navigation.navigate('DetalleRadiales', { id: id }); // Pasar el ID en lugar de los resultados
-
+      const resultsRA = await searchRadialById(id);
+      navigation.navigate('DetalleRadiales', { id: id });
     } catch (error) {
-        console.error('Error al buscar los datos:', error);
-        Alert.alert('Error', 'Hubo un error al buscar los datos. Por favor, inténtalo de nuevo.');
+      console.error('Error al buscar los datos:', error);
+      Alert.alert('Error', 'Hubo un error al buscar los datos. Por favor, inténtalo de nuevo.');
     }
-};
+  };
+
+  const renderHeader = () => (
+    <View style={styles.resultItem}>
+      <Text style={styles.itemText}>Código</Text>
+      <Text style={styles.itemText}>SE</Text>
+      <Text style={styles.itemText}>AMT</Text>
+      <Text style={styles.itemText}>Marca</Text>
+      <Text style={styles.itemText}>Acción</Text>
+    </View>
+  );
 
   const renderItem = ({ item }) => (
     <View style={styles.resultItem}>
@@ -63,9 +68,8 @@ const BuscarRadiales = () => {
       <Text style={styles.itemText}>{item.se}</Text>
       <Text style={styles.itemText}>{item.amt}</Text>
       <Text style={styles.itemText}>{item.marca}</Text>
-      {/* Agrega los campos adicionales que desees mostrar */}
       <TouchableOpacity onPress={() => handleGoButtonClick(item.id)} style={styles.buttonContainer}>
-        <Text style={styles.buttonText}>VER MAS </Text>
+        <Text style={styles.buttonText}>VER MAS</Text>
       </TouchableOpacity>
     </View>
   );
@@ -94,7 +98,8 @@ const BuscarRadiales = () => {
       <View style={styles.resultsContainer}>
         <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
         <FlatList
-          data={searchResults}
+          ListHeaderComponent={renderHeader} // Agrega la cabecera de la tabla
+          data={searchResults.slice(0, 5)} // Limita la visualización a los primeros 5 resultados
           renderItem={renderItem}
           keyExtractor={keyExtractor}
           onEndReached={loadMoreResults}
@@ -154,7 +159,7 @@ const styles = StyleSheet.create({
     color: 'black',
   },
   buttonText: {
-    color: 'blue', // Cambia el color del texto del botón
+    color: 'blue',
   },
 });
 
