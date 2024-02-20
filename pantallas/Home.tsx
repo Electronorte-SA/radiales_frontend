@@ -195,12 +195,13 @@ function Home({navigation}): JSX.Element {
                       navigation.push('Camara');
                     }}></Boton>
                   <Boton
-                    text="BUSCAR ID"
-                    onPress={() => navigation.push('QRGen')}
+                    text="BUSCAR RAD"
+                    onPress={() => navigation.push('buscar_rad')}
                     ></Boton>
+              
                      <Boton
-                    text="BUSCAR BUSE"
-                    onPress={() => navigation.push('BuscaSube')}
+                    text="BUSCAR BUB"
+                    onPress={() => navigation.push('Buscar_Sub')}
                     ></Boton>
 
                       {/* <Boton

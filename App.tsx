@@ -16,9 +16,10 @@ const Logo = () => (
 
 import Home from './pantallas/Home';
 import Camara from './pantallas/Camara';
-import BuscarId from './pantallas/BuscarId';
+import buscarRadiales from './pantallas/buscarRadiales';
 import BuscaSube from './pantallas/BuscaSube';
 import Verdetaller from './pantallas/verdetaller';
+import DetalleRadiales from './pantallas/DetalleRadiales';
 
 function App(): JSX.Element {
   const Stack = createNativeStackNavigator();
@@ -45,9 +46,10 @@ function App(): JSX.Element {
     
 
         <Stack.Screen name="Camara" component={Camara} />
-        <Stack.Screen name="QRGen" component={BuscarId} />
-        <Stack.Screen name="BuscaSube" component={BuscaSube} />
+        <Stack.Screen name="buscar_rad" component={buscarRadiales} />
+        <Stack.Screen name="Buscar_Sub" component={BuscaSube} />
         <Stack.Screen name="Verdetaller" component={Verdetaller} />
+        <Stack.Screen name="DetalleRadiales" component={DetalleRadiales} />
      
       </Stack.Navigator>
     </NavigationContainer>

@@ -850,9 +850,6 @@ export const botonsubestaciones = async (generatedToken) => {
 
 
 
-///////////////////////////////////////////////7777BUSQUEDAD//////////////////////
-
-
 
 export function searchSubestaciones(query) {
   let searchTerm = query.trim();
@@ -1000,3 +997,373 @@ export function searchSubestacionById(id) {
   });
 }
 
+
+///////////////////////radiales+
+
+// export function searchRadialesQR(query) {
+//   let searchTerm = query.trim();
+//   let sqlQuery;
+//   let sqlParams = [];
+
+//   // Verificar si el término de búsqueda tiene al menos 3 caracteres
+//   if (searchTerm.length < 2) {
+//     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
+//     return Promise.resolve([]);
+//   }
+
+//   // Verificar y manejar los caracteres especiales
+//   if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
+//     searchTerm = searchTerm.slice(1);
+//   }
+//   if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
+//     searchTerm = searchTerm.slice(0, -1);
+//   }
+
+//   if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
+//     // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
+//     sqlQuery = `SELECT
+//                   radialesQR.codigo,
+//                   radialesQR.se,
+//                   radialesQR.amt,
+//                   radialesQR.marca,
+//                   radialesQR.modelo_de_rele,
+//                   radialesQR.nombre_de_radial,
+//                   radialesQR.nivel_de_tension_kv,
+//                   radialesQR.tipo,
+//                   radialesQR.propietario,
+//                   radialesQR.latitud,
+//                   radialesQR.longitud,
+//                   radialesQR.fec_instala,
+//                   radialesQR.estado,
+//                   radialesQR.fec_camb_bateria
+//                 FROM radialesQR
+//                 WHERE
+//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
+//     sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
+//   } else if (searchTerm.startsWith('%')) {
+//     // Caso 1: Palabra que termina con el término de búsqueda
+//     sqlQuery = `SELECT
+//                   radialesQR.codigo,
+//                   radialesQR.se,
+//                   radialesQR.amt,
+//                   radialesQR.marca,
+//                   radialesQR.modelo_de_rele,
+//                   radialesQR.nombre_de_radial,
+//                   radialesQR.nivel_de_tension_kv,
+//                   radialesQR.tipo,
+//                   radialesQR.propietario,
+//                   radialesQR.latitud,
+//                   radialesQR.longitud,
+//                   radialesQR.fec_instala,
+//                   radialesQR.estado,
+//                   radialesQR.fec_camb_bateria
+//                 FROM radialesQR
+//                 WHERE 
+//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
+//     sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
+//   } else if (searchTerm.endsWith('%')) {
+//     // Caso 2: Palabra que comienza con el término de búsqueda
+//     sqlQuery = `SELECT
+//                   radialesQR.codigo,
+//                   radialesQR.se,
+//                   radialesQR.amt,
+//                   radialesQR.marca,
+//                   radialesQR.modelo_de_rele,
+//                   radialesQR.nombre_de_radial,
+//                   radialesQR.nivel_de_tension_kv,
+//                   radialesQR.tipo,
+//                   radialesQR.propietario,
+//                   radialesQR.latitud,
+//                   radialesQR.longitud,
+//                   radialesQR.fec_instala,
+//                   radialesQR.estado,
+//                   radialesQR.fec_camb_bateria
+//                 FROM radialesQR
+//                 WHERE
+//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
+//     sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
+//   } else {
+//     // Caso 4: Palabra exacta con al menos 3 caracteres
+//     sqlQuery = `SELECT
+//                   radialesQR.codigo,
+//                   radialesQR.se,
+//                   radialesQR.amt,
+//                   radialesQR.marca,
+//                   radialesQR.modelo_de_rele,
+//                   radialesQR.nombre_de_radial,
+//                   radialesQR.nivel_de_tension_kv,
+//                   radialesQR.tipo,
+//                   radialesQR.propietario,
+//                   radialesQR.latitud,
+//                   radialesQR.longitud,
+//                   radialesQR.fec_instala,
+//                   radialesQR.estado,
+//                   radialesQR.fec_camb_bateria
+//                 FROM radialesQR
+//                 WHERE
+//                 LENGTH(?) >= 2 AND (
+//                   UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.se) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.amt) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.marca) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+//                   UPPER(radialesQR.estado) LIKE UPPER(?)
+//                 )`;
+//     sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+//   }
+
+//   return new Promise((resolve, reject) => {
+//     db.transaction(tx => {
+//       tx.executeSql(
+//         sqlQuery,
+//         sqlParams,
+//         (_, { rows }) => {
+//           const results = [];
+//           for (let i = 0; i < rows.length; i++) {
+//             results.push(rows.item(i));
+//           }
+//           // console.log('Resultados:', results);
+//           resolve(results);
+//         },
+//         (_, error) => {
+//           reject(error);
+//         }
+//       );
+//     });
+//   });
+// }
+export function searchRadialesQR(query) {
+  let searchTerm = query.trim();
+  let sqlQuery;
+  let sqlParams = [];
+
+  // Verificar si el término de búsqueda tiene al menos 3 caracteres
+  if (searchTerm.length < 2) {
+    console.log('El término de búsqueda debe tener al menos 3 caracteres.');
+    return Promise.resolve([]);
+  }
+
+  // Verificar y manejar los caracteres especiales
+  if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
+    searchTerm = searchTerm.slice(1);
+  }
+  if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
+    searchTerm = searchTerm.slice(0, -1);
+  }
+
+  if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
+    // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
+    sqlQuery = `SELECT
+                  radialesQR.id,
+                  radialesQR.codigo,
+                  radialesQR.se,
+                  radialesQR.amt,
+                  radialesQR.marca,
+                  radialesQR.modelo_de_rele,
+                  radialesQR.nombre_de_radial,
+                  radialesQR.nivel_de_tension_kv,
+                  radialesQR.tipo,
+                  radialesQR.propietario,
+                  radialesQR.latitud,
+                  radialesQR.longitud,
+                  radialesQR.fec_instala,
+                  radialesQR.estado,
+                  radialesQR.fec_camb_bateria
+                FROM radialesQR
+                WHERE
+                UPPER(radialesQR.id) LIKE UPPER(?) OR
+                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+                UPPER(radialesQR.se) LIKE UPPER(?) OR
+                UPPER(radialesQR.amt) LIKE UPPER(?) OR
+                UPPER(radialesQR.marca) LIKE UPPER(?) OR
+                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+                UPPER(radialesQR.estado) LIKE UPPER(?)`;
+    sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
+  } else if (searchTerm.startsWith('%')) {
+    // Caso 1: Palabra que termina con el término de búsqueda
+    sqlQuery = `SELECT
+                  radialesQR.id,
+                  radialesQR.codigo,
+                  radialesQR.se,
+                  radialesQR.amt,
+                  radialesQR.marca,
+                  radialesQR.modelo_de_rele,
+                  radialesQR.nombre_de_radial,
+                  radialesQR.nivel_de_tension_kv,
+                  radialesQR.tipo,
+                  radialesQR.propietario,
+                  radialesQR.latitud,
+                  radialesQR.longitud,
+                  radialesQR.fec_instala,
+                  radialesQR.estado,
+                  radialesQR.fec_camb_bateria
+                FROM radialesQR
+                WHERE 
+                UPPER(radialesQR.id) LIKE UPPER(?) OR
+                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+                UPPER(radialesQR.se) LIKE UPPER(?) OR
+                UPPER(radialesQR.amt) LIKE UPPER(?) OR
+                UPPER(radialesQR.marca) LIKE UPPER(?) OR
+                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+                UPPER(radialesQR.estado) LIKE UPPER(?)`;
+    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
+  } else if (searchTerm.endsWith('%')) {
+    // Caso 2: Palabra que comienza con el término de búsqueda
+    sqlQuery = `SELECT
+                  radialesQR.id,
+                  radialesQR.codigo,
+                  radialesQR.se,
+                  radialesQR.amt,
+                  radialesQR.marca,
+                  radialesQR.modelo_de_rele,
+                  radialesQR.nombre_de_radial,
+                  radialesQR.nivel_de_tension_kv,
+                  radialesQR.tipo,
+                  radialesQR.propietario,
+                  radialesQR.latitud,
+                  radialesQR.longitud,
+                  radialesQR.fec_instala,
+                  radialesQR.estado,
+                  radialesQR.fec_camb_bateria
+                FROM radialesQR
+                WHERE
+                UPPER(radialesQR.id) LIKE UPPER(?) OR
+                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+                UPPER(radialesQR.se) LIKE UPPER(?) OR
+                UPPER(radialesQR.amt) LIKE UPPER(?) OR
+                UPPER(radialesQR.marca) LIKE UPPER(?) OR
+                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+                UPPER(radialesQR.estado) LIKE UPPER(?)`;
+    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
+  } else {
+    // Caso 4: Palabra exacta con al menos 3 caracteres
+    sqlQuery = `SELECT
+                  radialesQR.id,
+                  radialesQR.codigo,
+                  radialesQR.se,
+                  radialesQR.amt,
+                  radialesQR.marca,
+                  radialesQR.modelo_de_rele,
+                  radialesQR.nombre_de_radial,
+                  radialesQR.nivel_de_tension_kv,
+                  radialesQR.tipo,
+                  radialesQR.propietario,
+                  radialesQR.latitud,
+                  radialesQR.longitud,
+                  radialesQR.fec_instala,
+                  radialesQR.estado,
+                  radialesQR.fec_camb_bateria
+                FROM radialesQR
+                WHERE
+                LENGTH(?) >= 2 AND (
+                  UPPER(radialesQR.id) LIKE UPPER(?) OR
+                  UPPER(radialesQR.codigo) LIKE UPPER(?) OR
+                  UPPER(radialesQR.se) LIKE UPPER(?) OR
+                  UPPER(radialesQR.amt) LIKE UPPER(?) OR
+                  UPPER(radialesQR.marca) LIKE UPPER(?) OR
+                  UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
+                  UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
+                  UPPER(radialesQR.tipo) LIKE UPPER(?) OR
+                  UPPER(radialesQR.propietario) LIKE UPPER(?) OR
+                  UPPER(radialesQR.estado) LIKE UPPER(?)
+                )`;
+    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+  }
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        sqlQuery,
+        sqlParams,
+        (_, { rows }) => {
+          const results = [];
+          for (let i = 0; i < rows.length; i++) {
+            results.push(rows.item(i));
+          }
+          // console.log('Resultados:', results);
+          resolve(results);
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+}
+
+export function searchRadialById(id) {
+  let sqlQuery = `SELECT
+                    radialesQR.codigo,
+                    radialesQR.se,
+                    radialesQR.amt,
+                    radialesQR.marca,
+                    radialesQR.modelo_de_rele,
+                    radialesQR.nombre_de_radial,
+                    radialesQR.nivel_de_tension_kv,
+                    radialesQR.tipo,
+                    radialesQR.propietario,
+                    radialesQR.latitud,
+                    radialesQR.longitud,
+                    radialesQR.fec_instala,
+                    radialesQR.estado,
+                    radialesQR.fec_camb_bateria
+                  FROM radialesQR
+                  WHERE radialesQR.id = ?`;
+  let sqlParams = [id];
+
+  return new Promise((resolve, reject) => {
+    db.transaction(tx => {
+      tx.executeSql(
+        sqlQuery,
+        sqlParams,
+        (_, { rows }) => {
+          const results = [];
+          for (let i = 0; i < rows.length; i++) {
+            results.push(rows.item(i)); // No es necesario cambiar esta línea
+          }
+          console.log('Resultados del detalle del radial:', results);
+          resolve(results);
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
+  });
+}
