@@ -850,114 +850,100 @@ export const botonsubestaciones = async (generatedToken) => {
 
 
 
+////////////////////////subestaciones 
 
+// export function searchSubestaciones(query) {
+//   let searchTerm = query.trim();
+//   let sqlQuery;
+//   let sqlParams = [];
+
+//   // Verificar si el término de búsqueda tiene al menos 3 caracteres
+//   if (searchTerm.length < 3) {
+//     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
+//     return Promise.resolve([]);
+//   } else {
+//     // Caso 4: Palabra que comienza con la cadena proporcionada
+//     sqlQuery = `SELECT
+//                   distrito,
+//                   direccion,
+//                   amt,
+//                   sed,
+//                   id
+//                 FROM subestaciones
+//                 WHERE
+//                 (
+//                   UPPER(distrito) LIKE UPPER(? || '%') OR
+//                   UPPER(direccion) LIKE UPPER(? || '%') OR
+//                   UPPER(amt) LIKE UPPER(? || '%') OR
+//                   UPPER(sed) LIKE UPPER(? || '%') OR
+//                   UPPER(id) LIKE UPPER(? || '%')
+//                 )`;
+//     sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+//   }
+
+//   return new Promise((resolve, reject) => {
+//     db.transaction(tx => {
+//       tx.executeSql(
+//         sqlQuery,
+//         sqlParams,
+//         (_, { rows }) => {
+//           const results = [];
+//           for (let i = 0; i < rows.length; i++) {
+//             results.push(rows.item(i));
+//           }
+//           resolve(results);
+//         },
+//         (_, error) => {
+//           reject(error);
+//         }
+//       );
+//     });
+//   });
+// }
 export function searchSubestaciones(query) {
-  let searchTerm = query.trim();
-  let sqlQuery;
-  let sqlParams = [];
+  let searchTerm = query.trim().toUpperCase(); // Convertir la consulta a mayúsculas
+  let sqlQuery = `SELECT
+                    distrito,
+                    direccion,
+                    amt,
+                    sed,
+                    id
+                  FROM subestaciones
+                  WHERE
+                  (
+                    UPPER(distrito) LIKE ? OR
+                    UPPER(direccion) LIKE ? OR
+                    UPPER(amt) LIKE ? OR
+                    UPPER(sed) LIKE ? OR
+                    UPPER(id) LIKE ?
+                  )`;
+  let sqlParams = Array(5).fill(`%${searchTerm}%`); // Array con 5 elementos iguales
 
-  // Verificar si el término de búsqueda tiene al menos 3 caracteres
-  if (searchTerm.length < 2) {
-    console.log('El término de búsqueda debe tener al menos 3 caracteres.');
-    return Promise.resolve([]);
-  }
-
-  // Verificar y manejar los caracteres especiales
-  if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
-    searchTerm = searchTerm.slice(1);
-  }
-  if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
-    searchTerm = searchTerm.slice(0, -1);
-  }
-
-  if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-    // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed,
-                  subestaciones.id
-                FROM subestaciones
-                WHERE
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.id) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
-  } else if (searchTerm.startsWith('%')) {
-    // Caso 1: Palabra que termina con el término de búsqueda
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed,
-                  subestaciones.id
-                FROM subestaciones  
-                WHERE 
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?) OR
-                UPPER(subestaciones.id) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-  } else if (searchTerm.endsWith('%')) {
-    // Caso 2: Palabra que comienza con el término de búsqueda
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed,
-                  subestaciones.id
-                FROM subestaciones
-                WHERE
-                UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                UPPER(subestaciones.sed) LIKE UPPER(?) OR
-                UPPER(subestaciones.id) LIKE UPPER(?)`;
-    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
-  } else {
-    // Caso 4: Palabra exacta con al menos 3 caracteres
-    sqlQuery = `SELECT
-                  subestaciones.distrito,
-                  subestaciones.direccion,
-                  subestaciones.amt,
-                  subestaciones.sed,
-                  subestaciones.id
-                FROM subestaciones
-                WHERE
-                LENGTH(?) >= 3 AND (
-                  UPPER(subestaciones.distrito) LIKE UPPER(?) OR
-                  UPPER(subestaciones.direccion) LIKE UPPER(?) OR
-                  UPPER(subestaciones.amt) LIKE UPPER(?) OR
-                  UPPER(subestaciones.sed) LIKE UPPER(?) OR
-                  UPPER(subestaciones.id) LIKE UPPER(?)
-                )`;
-    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
-  }
-
+  // Esperar un breve tiempo antes de ejecutar la consulta
+  const delay = 300; // Tiempo de espera en milisegundos (ajústalo según sea necesario)
   return new Promise((resolve, reject) => {
-    db.transaction(tx => {
-      tx.executeSql(
-        sqlQuery,
-        sqlParams,
-        (_, { rows }) => {
-          const results = [];
-          for (let i = 0; i < rows.length; i++) {
-            results.push(rows.item(i));
+    setTimeout(() => {
+      db.transaction(tx => {
+        tx.executeSql(
+          sqlQuery,
+          sqlParams,
+          (_, { rows }) => {
+            const results = [];
+            for (let i = 0; i < rows.length; i++) {
+              results.push(rows.item(i));
+            }
+            resolve(results);
+          },
+          (_, error) => {
+            reject(error);
           }
-          // console.log('Resultados:', results);
-          resolve(results);
-        },
-        (_, error) => {
-          reject(error);
-        }
-      );
-    });
+        );
+      });
+    }, delay);
   });
 }
+
+
 
 export function searchSubestacionById(id) {
   let sqlQuery = `SELECT
@@ -1000,310 +986,37 @@ export function searchSubestacionById(id) {
 
 ///////////////////////radiales+
 
-// export function searchRadialesQR(query) {
-//   let searchTerm = query.trim();
-//   let sqlQuery;
-//   let sqlParams = [];
-
-//   // Verificar si el término de búsqueda tiene al menos 3 caracteres
-//   if (searchTerm.length < 2) {
-//     console.log('El término de búsqueda debe tener al menos 3 caracteres.');
-//     return Promise.resolve([]);
-//   }
-
-//   // Verificar y manejar los caracteres especiales
-//   if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
-//     searchTerm = searchTerm.slice(1);
-//   }
-//   if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
-//     searchTerm = searchTerm.slice(0, -1);
-//   }
-
-//   if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-//     // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-//     sqlQuery = `SELECT
-//                   radialesQR.codigo,
-//                   radialesQR.se,
-//                   radialesQR.amt,
-//                   radialesQR.marca,
-//                   radialesQR.modelo_de_rele,
-//                   radialesQR.nombre_de_radial,
-//                   radialesQR.nivel_de_tension_kv,
-//                   radialesQR.tipo,
-//                   radialesQR.propietario,
-//                   radialesQR.latitud,
-//                   radialesQR.longitud,
-//                   radialesQR.fec_instala,
-//                   radialesQR.estado,
-//                   radialesQR.fec_camb_bateria
-//                 FROM radialesQR
-//                 WHERE
-//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
-//   } else if (searchTerm.startsWith('%')) {
-//     // Caso 1: Palabra que termina con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   radialesQR.codigo,
-//                   radialesQR.se,
-//                   radialesQR.amt,
-//                   radialesQR.marca,
-//                   radialesQR.modelo_de_rele,
-//                   radialesQR.nombre_de_radial,
-//                   radialesQR.nivel_de_tension_kv,
-//                   radialesQR.tipo,
-//                   radialesQR.propietario,
-//                   radialesQR.latitud,
-//                   radialesQR.longitud,
-//                   radialesQR.fec_instala,
-//                   radialesQR.estado,
-//                   radialesQR.fec_camb_bateria
-//                 FROM radialesQR
-//                 WHERE 
-//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
-//     sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-//   } else if (searchTerm.endsWith('%')) {
-//     // Caso 2: Palabra que comienza con el término de búsqueda
-//     sqlQuery = `SELECT
-//                   radialesQR.codigo,
-//                   radialesQR.se,
-//                   radialesQR.amt,
-//                   radialesQR.marca,
-//                   radialesQR.modelo_de_rele,
-//                   radialesQR.nombre_de_radial,
-//                   radialesQR.nivel_de_tension_kv,
-//                   radialesQR.tipo,
-//                   radialesQR.propietario,
-//                   radialesQR.latitud,
-//                   radialesQR.longitud,
-//                   radialesQR.fec_instala,
-//                   radialesQR.estado,
-//                   radialesQR.fec_camb_bateria
-//                 FROM radialesQR
-//                 WHERE
-//                 UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.se) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.amt) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.marca) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-//                 UPPER(radialesQR.estado) LIKE UPPER(?)`;
-//     sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
-//   } else {
-//     // Caso 4: Palabra exacta con al menos 3 caracteres
-//     sqlQuery = `SELECT
-//                   radialesQR.codigo,
-//                   radialesQR.se,
-//                   radialesQR.amt,
-//                   radialesQR.marca,
-//                   radialesQR.modelo_de_rele,
-//                   radialesQR.nombre_de_radial,
-//                   radialesQR.nivel_de_tension_kv,
-//                   radialesQR.tipo,
-//                   radialesQR.propietario,
-//                   radialesQR.latitud,
-//                   radialesQR.longitud,
-//                   radialesQR.fec_instala,
-//                   radialesQR.estado,
-//                   radialesQR.fec_camb_bateria
-//                 FROM radialesQR
-//                 WHERE
-//                 LENGTH(?) >= 2 AND (
-//                   UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.se) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.amt) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.marca) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-//                   UPPER(radialesQR.estado) LIKE UPPER(?)
-//                 )`;
-//     sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
-//   }
-
-//   return new Promise((resolve, reject) => {
-//     db.transaction(tx => {
-//       tx.executeSql(
-//         sqlQuery,
-//         sqlParams,
-//         (_, { rows }) => {
-//           const results = [];
-//           for (let i = 0; i < rows.length; i++) {
-//             results.push(rows.item(i));
-//           }
-//           // console.log('Resultados:', results);
-//           resolve(results);
-//         },
-//         (_, error) => {
-//           reject(error);
-//         }
-//       );
-//     });
-//   });
-// }
 export function searchRadialesQR(query) {
   let searchTerm = query.trim();
   let sqlQuery;
   let sqlParams = [];
 
-  // Verificar si el término de búsqueda tiene al menos 3 caracteres
-  if (searchTerm.length < 2) {
-    console.log('El término de búsqueda debe tener al menos 3 caracteres.');
+  // Verificar si el término de búsqueda tiene al menos 2 caracteres
+  if (searchTerm.length < 3) {
+    console.log('El término de búsqueda debe tener al menos 2 caracteres.');
     return Promise.resolve([]);
-  }
-
-  // Verificar y manejar los caracteres especiales
-  if (searchTerm.startsWith('%') || searchTerm.startsWith('*') || searchTerm.startsWith('#')) {
-    searchTerm = searchTerm.slice(1);
-  }
-  if (searchTerm.endsWith('%') || searchTerm.endsWith('*') || searchTerm.endsWith('#')) {
-    searchTerm = searchTerm.slice(0, -1);
-  }
-
-  if (searchTerm.startsWith('%') && searchTerm.endsWith('%')) {
-    // Caso 3: Palabra que contiene el término de búsqueda en cualquier parte
-    sqlQuery = `SELECT
-                  radialesQR.id,
-                  radialesQR.codigo,
-                  radialesQR.se,
-                  radialesQR.amt,
-                  radialesQR.marca,
-                  radialesQR.modelo_de_rele,
-                  radialesQR.nombre_de_radial,
-                  radialesQR.nivel_de_tension_kv,
-                  radialesQR.tipo,
-                  radialesQR.propietario,
-                  radialesQR.latitud,
-                  radialesQR.longitud,
-                  radialesQR.fec_instala,
-                  radialesQR.estado,
-                  radialesQR.fec_camb_bateria
-                FROM radialesQR
-                WHERE
-                UPPER(radialesQR.id) LIKE UPPER(?) OR
-                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-                UPPER(radialesQR.se) LIKE UPPER(?) OR
-                UPPER(radialesQR.amt) LIKE UPPER(?) OR
-                UPPER(radialesQR.marca) LIKE UPPER(?) OR
-                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-                UPPER(radialesQR.estado) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`, `%${searchTerm}%`];
-  } else if (searchTerm.startsWith('%')) {
-    // Caso 1: Palabra que termina con el término de búsqueda
-    sqlQuery = `SELECT
-                  radialesQR.id,
-                  radialesQR.codigo,
-                  radialesQR.se,
-                  radialesQR.amt,
-                  radialesQR.marca,
-                  radialesQR.modelo_de_rele,
-                  radialesQR.nombre_de_radial,
-                  radialesQR.nivel_de_tension_kv,
-                  radialesQR.tipo,
-                  radialesQR.propietario,
-                  radialesQR.latitud,
-                  radialesQR.longitud,
-                  radialesQR.fec_instala,
-                  radialesQR.estado,
-                  radialesQR.fec_camb_bateria
-                FROM radialesQR
-                WHERE 
-                UPPER(radialesQR.id) LIKE UPPER(?) OR
-                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-                UPPER(radialesQR.se) LIKE UPPER(?) OR
-                UPPER(radialesQR.amt) LIKE UPPER(?) OR
-                UPPER(radialesQR.marca) LIKE UPPER(?) OR
-                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-                UPPER(radialesQR.estado) LIKE UPPER(?)`;
-    sqlParams = [`%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`, `%${searchTerm.slice(1)}`];
-  } else if (searchTerm.endsWith('%')) {
-    // Caso 2: Palabra que comienza con el término de búsqueda
-    sqlQuery = `SELECT
-                  radialesQR.id,
-                  radialesQR.codigo,
-                  radialesQR.se,
-                  radialesQR.amt,
-                  radialesQR.marca,
-                  radialesQR.modelo_de_rele,
-                  radialesQR.nombre_de_radial,
-                  radialesQR.nivel_de_tension_kv,
-                  radialesQR.tipo,
-                  radialesQR.propietario,
-                  radialesQR.latitud,
-                  radialesQR.longitud,
-                  radialesQR.fec_instala,
-                  radialesQR.estado,
-                  radialesQR.fec_camb_bateria
-                FROM radialesQR
-                WHERE
-                UPPER(radialesQR.id) LIKE UPPER(?) OR
-                UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-                UPPER(radialesQR.se) LIKE UPPER(?) OR
-                UPPER(radialesQR.amt) LIKE UPPER(?) OR
-                UPPER(radialesQR.marca) LIKE UPPER(?) OR
-                UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-                UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-                UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-                UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-                UPPER(radialesQR.estado) LIKE UPPER(?)`;
-    sqlParams = [`${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`, `${searchTerm.slice(0, -1)}%`];
   } else {
-    // Caso 4: Palabra exacta con al menos 3 caracteres
+    // Caso 4: Palabra que comienza con la cadena proporcionada
     sqlQuery = `SELECT
-                  radialesQR.id,
-                  radialesQR.codigo,
-                  radialesQR.se,
-                  radialesQR.amt,
-                  radialesQR.marca,
-                  radialesQR.modelo_de_rele,
-                  radialesQR.nombre_de_radial,
-                  radialesQR.nivel_de_tension_kv,
-                  radialesQR.tipo,
-                  radialesQR.propietario,
-                  radialesQR.latitud,
-                  radialesQR.longitud,
-                  radialesQR.fec_instala,
-                  radialesQR.estado,
-                  radialesQR.fec_camb_bateria
+                  id,
+                  codigo,
+                  se,
+                  amt,
+                  marca,
+                  modelo_de_rele,
+                  nombre_de_radial,
+                  nivel_de_tension_kv
                 FROM radialesQR
                 WHERE
-                LENGTH(?) >= 2 AND (
-                  UPPER(radialesQR.id) LIKE UPPER(?) OR
-                  UPPER(radialesQR.codigo) LIKE UPPER(?) OR
-                  UPPER(radialesQR.se) LIKE UPPER(?) OR
-                  UPPER(radialesQR.amt) LIKE UPPER(?) OR
-                  UPPER(radialesQR.marca) LIKE UPPER(?) OR
-                  UPPER(radialesQR.modelo_de_rele) LIKE UPPER(?) OR
-                  UPPER(radialesQR.nombre_de_radial) LIKE UPPER(?) OR
-                  UPPER(radialesQR.tipo) LIKE UPPER(?) OR
-                  UPPER(radialesQR.propietario) LIKE UPPER(?) OR
-                  UPPER(radialesQR.estado) LIKE UPPER(?)
+                (
+                  UPPER(codigo) LIKE UPPER(? || '%') OR
+                  UPPER(se) LIKE UPPER(? || '%') OR
+                  UPPER(amt) LIKE UPPER(? || '%') OR
+                  UPPER(marca) LIKE UPPER(? || '%') OR
+                  UPPER(modelo_de_rele) LIKE UPPER(? || '%') OR
+                  UPPER(nombre_de_radial) LIKE UPPER(? || '%')
                 )`;
-    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
   }
 
   return new Promise((resolve, reject) => {
@@ -1316,7 +1029,6 @@ export function searchRadialesQR(query) {
           for (let i = 0; i < rows.length; i++) {
             results.push(rows.item(i));
           }
-          // console.log('Resultados:', results);
           resolve(results);
         },
         (_, error) => {
@@ -1326,6 +1038,7 @@ export function searchRadialesQR(query) {
     });
   });
 }
+
 
 export function searchRadialById(id) {
   let sqlQuery = `SELECT
