@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { searchSubestaciones, searchSubestacionById } from './services/database.service';
+import { searchSubestaciones, searchSubestacionById, getWordCountSubestaciones } from './services/database.service';
 
 const BuscaSube = () => {
   const [searchText, setSearchText] = useState('');
@@ -15,11 +15,13 @@ const BuscaSube = () => {
     if (!loading && hasMore) {
       setLoading(true);
       try {
+        if (searchText.length >= 3) {
         const results = await searchSubestaciones(searchText, page, 10);
         const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
         setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
         setPage(prevPage => prevPage + 1);
         setHasMore(uniqueResults.length === 10);
+        }
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
         Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
@@ -95,8 +97,9 @@ const BuscaSube = () => {
         </View>
         {loading && <ActivityIndicator size="large" color="#0000ff" />}
       </View>
-      <View style={styles.resultsContainer}>
-        <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
+      <View style={styles.resultsContainer}> 
+      
+      <Text style={styles.resultsTitle}>Resultados de la búsqueda: {getWordCountSubestaciones()} palabras encontradas</Text>
         <FlatList
           data={searchResults.slice(0, 5)} // Limita la visualización a 5 resultados
           ListHeaderComponent={renderHeader} // Agrega el encabezado de la tabla

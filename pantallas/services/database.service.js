@@ -900,8 +900,15 @@ export const botonsubestaciones = async (generatedToken) => {
 //     });
 //   });
 // }
+let globalSearchTermSubestaciones = ""; // Variable global para almacenar el término de búsqueda de subestaciones
+let wordCountSubestaciones = 0; // Variable para contar el número de palabras encontradas en Subestaciones
+
 export function searchSubestaciones(query) {
-  let searchTerm = query.trim().toUpperCase(); // Convertir la consulta a mayúsculas
+  if (query) {
+    // Actualizar globalSearchTermSubestaciones solo si la consulta no es nula o vacía
+    globalSearchTermSubestaciones = query.trim().toUpperCase(); // Convertir la consulta a mayúsculas
+  }
+
   let sqlQuery = `SELECT
                     distrito,
                     direccion,
@@ -917,30 +924,32 @@ export function searchSubestaciones(query) {
                     UPPER(sed) LIKE ? OR
                     UPPER(id) LIKE ?
                   )`;
-  let sqlParams = Array(5).fill(`%${searchTerm}%`); // Array con 5 elementos iguales
+  let sqlParams = Array(5).fill(`%${globalSearchTermSubestaciones}%`); // Array con 5 elementos iguales
 
-  // Esperar un breve tiempo antes de ejecutar la consulta
-  const delay = 300; // Tiempo de espera en milisegundos (ajústalo según sea necesario)
   return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      db.transaction(tx => {
-        tx.executeSql(
-          sqlQuery,
-          sqlParams,
-          (_, { rows }) => {
-            const results = [];
-            for (let i = 0; i < rows.length; i++) {
-              results.push(rows.item(i));
-            }
-            resolve(results);
-          },
-          (_, error) => {
-            reject(error);
+    db.transaction(tx => {
+      tx.executeSql(
+        sqlQuery,
+        sqlParams,
+        (_, { rows }) => {
+          const results = [];
+          wordCountSubestaciones = rows.length; // Actualizar el conteo de palabras encontradas
+          for (let i = 0; i < wordCountSubestaciones; i++) {
+            results.push(rows.item(i));
           }
-        );
-      });
-    }, delay);
+          resolve(results);
+        },
+        (_, error) => {
+          reject(error);
+        }
+      );
+    });
   });
+}
+
+// Función para obtener el conteo de palabras encontradas en Subestaciones
+export function getWordCountSubestaciones() {
+  return wordCountSubestaciones;
 }
 
 
@@ -986,38 +995,86 @@ export function searchSubestacionById(id) {
 
 ///////////////////////radiales+
 
-export function searchRadialesQR(query) {
-  let searchTerm = query.trim();
-  let sqlQuery;
-  let sqlParams = [];
+// **Inicializar searchTerm con un valor vacío fuera de la función**
+// let searchTerm = "";
 
-  // Verificar si el término de búsqueda tiene al menos 2 caracteres
-  if (searchTerm.length < 3) {
-    console.log('El término de búsqueda debe tener al menos 2 caracteres.');
-    return Promise.resolve([]);
-  } else {
-    // Caso 4: Palabra que comienza con la cadena proporcionada
-    sqlQuery = `SELECT
-                  id,
-                  codigo,
-                  se,
-                  amt,
-                  marca,
-                  modelo_de_rele,
-                  nombre_de_radial,
-                  nivel_de_tension_kv
-                FROM radialesQR
-                WHERE
-                (
-                  UPPER(codigo) LIKE UPPER(? || '%') OR
-                  UPPER(se) LIKE UPPER(? || '%') OR
-                  UPPER(amt) LIKE UPPER(? || '%') OR
-                  UPPER(marca) LIKE UPPER(? || '%') OR
-                  UPPER(modelo_de_rele) LIKE UPPER(? || '%') OR
-                  UPPER(nombre_de_radial) LIKE UPPER(? || '%')
-                )`;
-    sqlParams = [searchTerm, searchTerm, searchTerm, searchTerm, searchTerm, searchTerm];
+// export function searchRadialesQR(query) {
+//   if (query) {
+//     // **Actualizar searchTerm solo si la consulta no es nula o vacía**
+//     searchTerm = query.trim().toUpperCase(); // Convertir la consulta a mayúsculas
+//   }
+
+//   let sqlQuery = `SELECT
+//     id,
+//     codigo,
+//     se,
+//     amt,
+//     marca,
+//     modelo_de_rele,
+//     nombre_de_radial,
+//     nivel_de_tension_kv
+//   FROM radialesQR
+//   WHERE
+//   (
+//     UPPER(codigo) LIKE ? OR
+//     UPPER(se) LIKE ? OR
+//     UPPER(amt) LIKE ? OR
+//     UPPER(marca) LIKE ? OR
+//     UPPER(modelo_de_rele) LIKE ? OR
+//     UPPER(nombre_de_radial) LIKE ?
+//   )`;
+
+//   let sqlParams = Array(6).fill(`%${searchTerm}%`); // Array con 6 elementos iguales
+
+//   return new Promise((resolve, reject) => {
+//     db.transaction(tx => {
+//       tx.executeSql(
+//         sqlQuery,
+//         sqlParams,
+//         (_, { rows }) => {
+//           const results = [];
+//           for (let i = 0; i < rows.length; i++) {
+//             results.push(rows.item(i));
+//           }
+//           resolve(results);
+//         },
+//         (_, error) => {
+//           reject(error);
+//         }
+//       );
+//     });
+//   });
+// }
+let searchTerm = "";
+let wordCount = 0; // Variable para contar el número de palabras encontradas
+
+export function searchRadialesQR(query) {
+  if (query) {
+    // Actualizar searchTerm solo si la consulta no es nula o vacía
+    searchTerm = query.trim().toUpperCase(); // Convertir la consulta a mayúsculas
   }
+
+  let sqlQuery = `SELECT
+    id,
+    codigo,
+    se,
+    amt,
+    marca,
+    modelo_de_rele,
+    nombre_de_radial,
+    nivel_de_tension_kv
+  FROM radialesQR
+  WHERE
+  (
+    UPPER(codigo) LIKE ? OR
+    UPPER(se) LIKE ? OR
+    UPPER(amt) LIKE ? OR
+    UPPER(marca) LIKE ? OR
+    UPPER(modelo_de_rele) LIKE ? OR
+    UPPER(nombre_de_radial) LIKE ?
+  )`;
+
+  let sqlParams = Array(6).fill(`%${searchTerm}%`); // Array con 6 elementos iguales
 
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
@@ -1026,7 +1083,8 @@ export function searchRadialesQR(query) {
         sqlParams,
         (_, { rows }) => {
           const results = [];
-          for (let i = 0; i < rows.length; i++) {
+          wordCount = rows.length; // Actualizar el conteo de palabras encontradas
+          for (let i = 0; i < wordCount; i++) {
             results.push(rows.item(i));
           }
           resolve(results);
@@ -1037,6 +1095,11 @@ export function searchRadialesQR(query) {
       );
     });
   });
+}
+
+// Función para obtener el conteo de palabras encontradas
+export function getWordCountRadiales() {
+  return wordCount;
 }
 
 

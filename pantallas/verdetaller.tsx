@@ -4,6 +4,8 @@ import { useRoute, useNavigation } from '@react-navigation/native';
 import { searchSubestacionById } from './services/database.service';
 import Geolocation from '@react-native-community/geolocation'; // Importar Geolocation desde '@react-native-community/geolocation'
 
+import { Alert } from 'react-native';
+
 const Verdetaller = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,6 +42,7 @@ const Verdetaller = () => {
           });
         },
         (error) => {
+          
           console.error('Error al obtener la ubicación del usuario:', error);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
@@ -66,6 +69,13 @@ const Verdetaller = () => {
       // Abrir Google Maps con las coordenadas proporcionadas
       Linking.openURL(googleMapsUrl);
     } else {
+        Alert.alert(
+          'No se pudo obtener la posición actual',
+          [
+            { text: 'OK', onPress: () => console.log('OK Pressed') }
+          ]
+        );
+      
       console.log('No se pudo obtener la ubicación del usuario.');
     }
   };

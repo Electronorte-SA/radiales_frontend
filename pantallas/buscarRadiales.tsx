@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, 
 import { useNavigation } from '@react-navigation/native';
 import { searchRadialesQR } from './services/database.service';
 import { searchRadialById } from './services/database.service';
+import {getWordCountRadiales } from './services/database.service';
 
 const BuscarRadiales = () => {
   const [searchText, setSearchText] = useState('');
@@ -16,11 +17,14 @@ const BuscarRadiales = () => {
     if (!loading && hasMore) {
       setLoading(true);
       try {
+        if (searchText.length >= 3) {
         const results = await searchRadialesQR(searchText, page, 10);
         const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
         setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
         setPage(prevPage => prevPage + 1);
         setHasMore(uniqueResults.length === 10);
+        }
+        
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
         Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
@@ -83,31 +87,31 @@ const BuscarRadiales = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.title}>Buscar Radiales</Text>
-        <View style={styles.searchContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Ingrese el término de búsqueda"
-            value={searchText}
-            onChangeText={handleSearchTextChange}
-          />
-        </View>
-        {loading && <ActivityIndicator size="large" color="#0000ff" />}
-      </View>
-      <View style={styles.resultsContainer}>
-        <Text style={styles.resultsTitle}>Resultados de la búsqueda:</Text>
-        <FlatList
-          ListHeaderComponent={renderHeader} // Agrega la cabecera de la tabla
-          data={searchResults.slice(0, 5)} // Limita la visualización a los primeros 5 resultados
-          renderItem={renderItem}
-          keyExtractor={keyExtractor}
-          onEndReached={loadMoreResults}
-          onEndReachedThreshold={0.1}
-          ListFooterComponent={renderFooter}
+    <View style={styles.content}>
+      <Text style={styles.title}>Buscar Radiales</Text>
+      <View style={styles.searchContainer}>
+        <TextInput
+          style={styles.input}
+          placeholder="Ingrese el término de búsqueda"
+          value={searchText}
+          onChangeText={handleSearchTextChange}
         />
       </View>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
     </View>
+    <View style={styles.resultsContainer}>
+      <Text style={styles.resultsTitle}>Resultados de la búsqueda: {getWordCountRadiales()} palabras encontradas</Text>
+      <FlatList
+        ListHeaderComponent={renderHeader} // Agrega la cabecera de la tabla
+        data={searchResults.slice(0, 5)} // Limita la visualización a los primeros 5 resultados
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+        onEndReached={loadMoreResults}
+        onEndReachedThreshold={0.1}
+        ListFooterComponent={renderFooter}
+      />
+    </View>
+  </View>
   );
 };
 
