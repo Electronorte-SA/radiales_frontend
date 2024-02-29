@@ -3,48 +3,44 @@ import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, 
 import { useNavigation } from '@react-navigation/native';
 import { searchRadialesQR } from './services/database.service';
 import { searchRadialById } from './services/database.service';
-import {getWordCountRadiales } from './services/database.service';
+
 
 const BuscarRadiales = () => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const navigation = useNavigation();
+   const navigation = useNavigation();
+   const page = 0;
+   const [rowCount, setRowCount] = useState(0);
 
-  const loadMoreResults = useCallback(async () => {
-    if (!loading && hasMore) {
-      setLoading(true);
+  const handleSearchTextChange = async (text:string) => {
+    const pageSize = 50
+    setSearchText(text); 
+    if (!loading) {
+      
       try {
-        if (searchText.length >= 3) {
-        const results = await searchRadialesQR(searchText, page, 10);
-        const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
-        setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
-        setPage(prevPage => prevPage + 1);
-        setHasMore(uniqueResults.length === 10);
-        }
+        if (text.length >= 3) {
+        setLoading(true);
+        const {count, results} = await searchRadialesQR(text, page, pageSize);
+        console.log(count)
+        setRowCount(count)
+        setLoading(false);
+        //const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
+        setSearchResults(prevResults => [...prevResults, ...results]);
+        }else{
+          setRowCount(0)
+          setSearchResults([])
+         }
         
       } catch (error) {
         console.error("Error al cargar más resultados:", error);
-        Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
+        Alert.alert(error);
       }
-      setLoading(false);
+      
     }
-  }, [loading, hasMore, page, searchText, searchResults]);
-
-  useEffect(() => {
-    setSearchResults([]);
-    setPage(1);
-    setHasMore(true);
-    if (searchText.trim() !== '') {
-      loadMoreResults();
-    }
-  }, [searchText]);
-
-  const handleSearchTextChange = (text) => {
-    setSearchText(text);
   };
+
+  
 
   const handleGoButtonClick = async (id) => {
     try {
@@ -100,14 +96,12 @@ const BuscarRadiales = () => {
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
     </View>
     <View style={styles.resultsContainer}>
-      <Text style={styles.resultsTitle}>Resultados de la búsqueda: {getWordCountRadiales()} palabras encontradas</Text>
+      <Text style={styles.resultsTitle}>Se encontraron {rowCount} coincidencias</Text>
       <FlatList
         ListHeaderComponent={renderHeader} // Agrega la cabecera de la tabla
         data={searchResults.slice(0, 5)} // Limita la visualización a los primeros 5 resultados
         renderItem={renderItem}
         keyExtractor={keyExtractor}
-        onEndReached={loadMoreResults}
-        onEndReachedThreshold={0.1}
         ListFooterComponent={renderFooter}
       />
     </View>

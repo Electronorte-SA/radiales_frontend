@@ -1,47 +1,41 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, Alert, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { searchSubestaciones, searchSubestacionById, getWordCountSubestaciones } from './services/database.service';
+import { searchSubestaciones, searchSubestacionById } from './services/database.service';
 
 const BuscaSube = () => {
   const [searchText, setSearchText] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const page = 0;
   const navigation = useNavigation();
+  const [rowCount, setRowCount] = useState(0);
+  const pageSize = 50
 
-  const loadMoreResults = useCallback(async () => {
-    if (!loading && hasMore) {
-      setLoading(true);
+  const handleSearchTextChange = async (text:string) => {
+    if (!loading) {
+      setSearchText(text); 
       try {
-        if (searchText.length >= 3) {
-        const results = await searchSubestaciones(searchText, page, 10);
-        const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
-        setSearchResults(prevResults => [...prevResults, ...uniqueResults]);
-        setPage(prevPage => prevPage + 1);
-        setHasMore(uniqueResults.length === 10);
-        }
+        if (text.length >= 3) {
+          setLoading(true);
+        const {count, results} = await searchSubestaciones(text, page, pageSize);
+        setLoading(false);
+        setRowCount(count);
+        //const uniqueResults = results.filter(result => !searchResults.some(existingResult => existingResult.id === result.id));
+        setSearchResults(results);
+         }
+         else{
+          setRowCount(0)
+          setSearchResults([])
+         }
       } catch (error) {
-        console.error("Error al cargar más resultados:", error);
-        Alert.alert("Error", "Ocurrió un error al cargar más resultados. Por favor, inténtelo de nuevo.");
+        setLoading(false);
+                Alert.alert("Error", error);
       }
-      setLoading(false);
+      
+       
     }
-  }, [loading, hasMore, page, searchText, searchResults]);
-  
-  
-  useEffect(() => {
-    setSearchResults([]);
-    setPage(1);
-    setHasMore(true);
-    if (searchText.trim() !== '') {
-      loadMoreResults();
-    }
-  }, [searchText]);
-
-  const handleSearchTextChange = (text) => {
-    setSearchText(text);
+    
   };
 
   const handleGoButtonClick = async (id) => {
@@ -99,14 +93,12 @@ const BuscaSube = () => {
       </View>
       <View style={styles.resultsContainer}> 
       
-      <Text style={styles.resultsTitle}>Resultados de la búsqueda: {getWordCountSubestaciones()} palabras encontradas</Text>
+      <Text style={styles.resultsTitle}>Se encontraron {rowCount} coincidencias</Text>
         <FlatList
-          data={searchResults.slice(0, 5)} // Limita la visualización a 5 resultados
+          data={searchResults.slice(0, 50)} // Limita la visualización a 5 resultados
           ListHeaderComponent={renderHeader} // Agrega el encabezado de la tabla
           renderItem={renderItem}
           keyExtractor={keyExtractor}
-          onEndReached={loadMoreResults}
-          onEndReachedThreshold={0.1}
           ListFooterComponent={renderFooter}
         />
       </View>
