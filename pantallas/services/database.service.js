@@ -146,7 +146,7 @@ export const initializeDatabase = () => {
   
 };
 //lasnfwchas de radiales
-export function getParametroFecha() {
+export function getLastUpdDateRdls() {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
@@ -165,7 +165,7 @@ export function getParametroFecha() {
     });
   });
 }
-export function getParametroFechaSubestaciones() {
+export function getLastUpdDateSubs() {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {
       tx.executeSql(
@@ -589,10 +589,10 @@ export const updateSubestaciones = data => {
   });
 };
 //////////////////////////////////////////mainnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn
-export const handleSync = async (generatedToken) => {
+export const syncRadiales = async (generatedToken) => {
   try {
     //  let exito_insertar = await insertBatchIntoDB(data);
-    let fecha_busqueda = await getParametroFecha();
+    let fecha_busqueda = await getLastUpdDateRdls();
 
     // let fecha_busqueda = '2023-11-13 17:20:00';
    
@@ -652,11 +652,11 @@ export const handleSync = async (generatedToken) => {
 
 // lllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllllll]
 
-export const handleSyncportodos = async (generatedToken) => {
+export const syncSubestaciones = async (generatedToken) => {
   try {
 
 // // variables de datos 22222222222
-    let fecha_busqueda_subestacciones =   await getParametroFechaSubestaciones(  );
+    let fecha_busqueda_subestacciones =   await getLastUpdDateSubs(  );
 //  let fecha_busqueda_subestacciones = "";
     
 // console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
@@ -664,19 +664,19 @@ export const handleSyncportodos = async (generatedToken) => {
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
     
     ///////////////LA SUBESTACIONES 
-
+    let exito_insertar_subestacionnes = false;
     if (data2) {
       if (fecha_busqueda_subestacciones === '') {
         console.log('paso subestaciones  2');
         if (data2.subestaciones) {
           console.log('pasosubestaciones  3'); 
-          let exito_insertar_subestacionnes = await insertSubestaciones(data2.subestaciones);
+           exito_insertar_subestacionnes = await insertSubestaciones(data2.subestaciones);
         }   
       }
     }
     ///////////////LA FECHA DE SUBESTACIONES
     let fecha_subetaciones = data2.fecha;
-    if (fecha_subetaciones) {
+    if (fecha_subetaciones && exito_insertar_subestacionnes) {
       let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
       // console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
@@ -692,7 +692,7 @@ export const handleSyncportodos = async (generatedToken) => {
 export const handleSyncSub = async (generatedToken) => {
   try {
     
- let fecha_busqueda_subestacciones = await getParametroFechaSubestaciones(  );
+ let fecha_busqueda_subestacciones = await getLastUpdDateSubs(  );
 //  let fecha_busqueda_subestacciones = "";
     let fecha = data.fecha;
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);

@@ -22,35 +22,37 @@ import {Grayscale} from 'react-native-image-filter-kit';
 
 import Boton from '../Componentes/Boton';
 
-import {initializeDatabase, handleSync, botonsubestaciones, handleSyncportodos, handleSyncSub, fetchToken} from './services/database.service';
+import {initializeDatabase,  syncRadiales, botonsubestaciones, syncSubestaciones, handleSyncSub, fetchToken, getLastUpdDateRdls, getLastUpdDateSubs} from './services/database.service';
 function Home({navigation}): JSX.Element {
-  const [loadedImage, setLoadedImage] = useState(false);
+  //const [loadedImage, setLoadedImage] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [token, setToken] = useState("")
-  const requestCameraPermission = async () => {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        {
-          title: 'App Camera Permission',
-          message: 'App needs access to your camera',
-          buttonNeutral: 'Ask Me Later',
-          buttonNegative: 'Cancel',
-          buttonPositive: 'OK',
-        },
-      );
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Camera permission given');
-      } else {
-        console.log('Camera permission denied');
-      }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
+  const [dateRdl, setDateRdl] = useState<Date>()
+  const [dateSub, setDateSub] = useState<Date>()
+  // const requestCameraPermission = async () => {
+  //   try {
+  //     const granted = await PermissionsAndroid.request(
+  //       PermissionsAndroid.PERMISSIONS.CAMERA,
+  //       {
+  //         title: 'App Camera Permission',
+  //         message: 'App needs access to your camera',
+  //         buttonNeutral: 'Ask Me Later',
+  //         buttonNegative: 'Cancel',
+  //         buttonPositive: 'OK',
+  //       },
+  //     );
+  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //       console.log('Camera permission given');
+  //     } else {
+  //       console.log('Camera permission denied');
+  //     }
+  //   } catch (err) {
+  //     console.warn(err);
+  //   }
+  // };
 
   let inicializaCompletado = false;
-  let sincronizaCompletado = true;
+  let syncSubCompleted = true;
+  let syncRdlCompleted = true;
   useEffect(() => {
     // Variable auxiliar para rastrear si las funciones han completado
     const inicio = async ()=>{
@@ -58,50 +60,102 @@ function Home({navigation}): JSX.Element {
       inicializaCompletado = true;
 
     }
-    const sincroniza = async () => {
+    let lastUpdSubs:Date;
+    let lastUpdRdls:Date;
+    const getLastUpdate = async()=>{
+      lastUpdSubs = await getLastUpdDateSubs()
+      setDateSub(lastUpdSubs)
+      lastUpdRdls =  await getLastUpdDateRdls()
+      setDateRdl(lastUpdRdls)
+    
+    }
+    const isInternetAvailable = async ()=>{
       try {
         const response = await fetch('https://radialesqr.azurewebsites.net');
-        // console.log('response', response);
-        sincronizaCompletado = false
-        if (response.ok) {
+        
+        if (response.ok) 
+          return true
+      } catch (error) { 
+        
+        if(!lastUpdSubs || !lastUpdRdls) { 
+        Alert.alert(
+          'Fallo en la conexion al internet' + error
+        );
+        }
+        
+      }
+        return false
+
+      
+    }
+    const syncRdls = async () => {
+      try {
+        syncRdlCompleted = false
           let generatedToken = await fetchToken();
-          setToken(generatedToken)
           setLoading(true);
           // Inicia la carga de las funciones
          
-          await handleSync(generatedToken);
-          await handleSyncportodos(generatedToken);
-          sincronizaCompletado = true;
+          await syncRadiales(generatedToken);
+          syncRdlCompleted = true;
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
-        } else { 
-          sincronizaCompletado = true
-          Alert.alert(
-            'Servidor Caído',
-            'No se puede acceder al servidor en este momento.',
-          );
-          setLoading(false);
-        }
+         
       } catch (error) { 
-        sincronizaCompletado = true
+        syncRdlCompleted = true
+        console.log('daterdl-', lastUpdRdls)
+        console.log('datesub-', lastUpdSubs)
+
+        if(!lastUpdSubs || !lastUpdRdls) { 
         Alert.alert(
-          'Servidor Caído',
-          'No se puede acceder al servidor en este momento.',
+          'Fallo en la conexion al internet' + error
         );
+        }
         setLoading(false);
       }
     };
-    inicio()
 
+    const syncSubs = async () => {
+      try {
+        syncSubCompleted = false
+          let generatedToken = await fetchToken();
+          setLoading(true);
+          // Inicia la carga de las funciones
+         
+          await syncSubestaciones(generatedToken);
+          syncSubCompleted = true;
+          setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
+        } catch(err) { 
+          syncSubCompleted = true
+          Alert.alert(
+            'Fallo en la conexion al servicio',
+          );
+          setLoading(false);
+        }
+  
+    };
+
+    inicio()
+    getLastUpdate()
     
-    const timeoutId = setInterval(() => {
+    
+    const timeoutSyncRdl = setInterval(async () => {
       // Comprueba si las funciones han completado antes  de ejecutar handleSync
-      if (inicializaCompletado && sincronizaCompletado) {
-        sincroniza();
+      const internetAvailable = await isInternetAvailable()
+      if (inicializaCompletado && syncRdlCompleted && internetAvailable) {
+        syncRdls();
       }
     }, 10000);
 
+    const timeoutSyncSub = setInterval(async () => {
+      // Comprueba si las funciones han completado antes  de ejecutar handleSync
+      const internetAvailable = await isInternetAvailable()
+      if (inicializaCompletado && syncSubCompleted && internetAvailable) {
+        syncSubs();
+      }
+    }, 500000);
+
     return () => {
-      clearInterval(timeoutId);
+      clearInterval(timeoutSyncRdl);
+      clearInterval(timeoutSyncSub);
       setLoading(false);
     };
   }, []);
@@ -189,20 +243,20 @@ function Home({navigation}): JSX.Element {
                 </View>
               ) : (
                 <View>
-                  <Boton
+                  {dateRdl &&<Boton
                     text="SCAN QR"
                     onPress={() => {
                       navigation.push('Camara');
-                    }}></Boton>
-                  <Boton
+                    }} />}
+                  {dateRdl && <Boton
                     text="BUSCAR RDL"
                     onPress={() => navigation.push('buscar_rdl')}
-                    ></Boton>
+                    />}
               
-                     <Boton
+                     {dateSub && <Boton
                     text="BUSCAR SUB"
                     onPress={() => navigation.push('Buscar_Sub')}
-                    ></Boton>
+                    />}
 
                       {/* <Boton
                     text="eleminar"
