@@ -24,3 +24,5 @@ Generar el apk
 ```
 .\gradlew assemblerelease
 ```
+Ruta donde se ubica 
+D:\react native\nativefroend\radiales_frontend\android\app\build\outputs\apk\release
