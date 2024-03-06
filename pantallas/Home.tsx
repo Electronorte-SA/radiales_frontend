@@ -58,15 +58,32 @@ function Home({navigation}): JSX.Element {
     const inicio = async ()=>{
       await initializeDatabase(); 
       inicializaCompletado = true;
-
     }
     let lastUpdSubs:Date;
     let lastUpdRdls:Date;
+
     const getLastUpdate = async()=>{
-      lastUpdSubs = await getLastUpdDateSubs()
-      setDateSub(lastUpdSubs)
-      lastUpdRdls =  await getLastUpdDateRdls()
-      setDateRdl(lastUpdRdls)
+      try{
+        Alert.alert('Obtiene fechas')
+        lastUpdSubs = await getLastUpdDateSubs()
+        Alert.alert('Las Subs', lastUpdSubs)
+        setDateSub(lastUpdSubs)
+        lastUpdRdls =  await getLastUpdDateRdls()
+        setDateRdl(lastUpdRdls)
+        if (lastUpdSubs || lastUpdRdls)
+        {
+          inicializaCompletado = true
+          Alert.alert(
+            'Fechas', lastUpdRdls, lastUpdSubs
+          );
+          console.log('inicio realizado')
+        }
+      }
+      catch(ex){
+        Alert.alert('Fallo al obtener fechas', ex)
+        throw ex;
+        
+      }
     
     }
     const isInternetAvailable = async ()=>{
@@ -75,16 +92,17 @@ function Home({navigation}): JSX.Element {
         
         if (response.ok) 
           return true
+        return true
       } catch (error) { 
-        
+        // si nunca se ha sincronizado comunica el error
         if(!lastUpdSubs || !lastUpdRdls) { 
         Alert.alert(
           'Fallo en la conexion al internet' + error
         );
         }
-        
-      }
         return false
+      }
+        
 
       
     }
@@ -95,16 +113,19 @@ function Home({navigation}): JSX.Element {
           setLoading(true);
           // Inicia la carga de las funciones
          
-          await syncRadiales(generatedToken);
+          let fecha = await syncRadiales(generatedToken);
+          console.log('fecha rdl', fecha)
           syncRdlCompleted = true;
+          if (fecha){
+            setDateRdl(fecha)
+          }
+
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
-         
+        
       } catch (error) { 
         syncRdlCompleted = true
-        console.log('daterdl-', lastUpdRdls)
-        console.log('datesub-', lastUpdSubs)
-
-        if(!lastUpdSubs || !lastUpdRdls) { 
+        
+        if(!lastUpdRdls) { 
         Alert.alert(
           'Fallo en la conexion al internet' + error
         );
@@ -120,9 +141,15 @@ function Home({navigation}): JSX.Element {
           setLoading(true);
           // Inicia la carga de las funciones
          
-          await syncSubestaciones(generatedToken);
+          let fecha = await syncSubestaciones(generatedToken);
+          console.log('fecha sub', fecha)
           syncSubCompleted = true;
+          if (fecha){
+
+            setDateSub(fecha)
+          }
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
+          
         } catch(err) { 
           syncSubCompleted = true
           Alert.alert(
@@ -132,30 +159,53 @@ function Home({navigation}): JSX.Element {
         }
   
     };
+    async function procesar(){
+      try{
+        //Alert.alert('Iniciando proceso ...')
+        
+          await inicio()
+          if (inicializaCompletado)
+          {
+            //await getLastUpdate()  
+            
+            if (await isInternetAvailable()){
+              syncRdls();
+              syncSubs();
+            }
+          }
+        
+        
+        
 
-    inicio()
-    getLastUpdate()
-    
-    
-    const timeoutSyncRdl = setInterval(async () => {
-      // Comprueba si las funciones han completado antes  de ejecutar handleSync
-      const internetAvailable = await isInternetAvailable()
-      if (inicializaCompletado && syncRdlCompleted && internetAvailable) {
-        syncRdls();
+      
+      }catch(ex){
+        Alert.alert('Fallo', ex.message)
       }
-    }, 10000);
+      
+    }
+    procesar()
 
-    const timeoutSyncSub = setInterval(async () => {
-      // Comprueba si las funciones han completado antes  de ejecutar handleSync
-      const internetAvailable = await isInternetAvailable()
-      if (inicializaCompletado && syncSubCompleted && internetAvailable) {
-        syncSubs();
-      }
-    }, 500000);
+    
+
+    // const timeoutSyncRdl = setInterval(async () => {
+    //   // Comprueba si las funciones han completado antes  de ejecutar handleSync
+    //   const internetAvailable = await isInternetAvailable()
+    //   if (inicializaCompletado && syncRdlCompleted && internetAvailable) {
+    //     syncRdls();
+    //   }
+    // }, 10000);
+
+    // const timeoutSyncSub = setInterval(async () => {
+    //   // Comprueba si las funciones han completado antes  de ejecutar handleSync
+    //   const internetAvailable = await isInternetAvailable()
+    //   if (inicializaCompletado && syncSubCompleted && internetAvailable) {
+    //     syncSubs();
+    //   }
+    // }, 500000);
 
     return () => {
-      clearInterval(timeoutSyncRdl);
-      clearInterval(timeoutSyncSub);
+      //clearInterval(timeoutSyncRdl);
+      //clearInterval(timeoutSyncSub);
       setLoading(false);
     };
   }, []);

@@ -307,14 +307,14 @@ const actualizarFechaEnParametrosQR = fecha => {
             'Fecha actualizada con éxito en la tabla parametrosqr:',
             fecha,
           );
-          resolve('Éxito al actualizar la fecha');
+          resolve(fecha);
         },
         (_, error) => {
           console.error(
             'Error al actualizar la fecha en la tabla parametrosqr:',
             error,
           );
-          reject('Error al actualizar la fecha');
+          reject(error);
         },
       );
     });
@@ -335,14 +335,14 @@ const actualizarFechaEnParametrosQRSubestaciones = fecha => {
             'Fecha actualizada con éxito en la tabla parametrosqrsubestaciones:',
             fecha,
           );
-          resolve('Éxito al actualizar la fecha en parametrosqrsubestaciones');
+          resolve(fecha);
         },
         (_, error) => {
           console.error(
             'Error al actualizar la fecha en la tabla parametrosqrsubestaciones:',
             error,
           );
-          reject('Error al actualizar la fecha en parametrosqrsubestaciones');
+          reject(error);
         },
       );
     });
@@ -457,7 +457,7 @@ export const insertSubestaciones = data => {
 
     Promise.all(insertPromises)
       .then(() => {
-        resolve('Inserción los datos de subestacciones  completa');
+        resolve(true);
       })
       .catch(error => {
         reject(`Error al insertar subestacciones datos: ${error}`);
@@ -634,13 +634,13 @@ export const syncRadiales = async (generatedToken) => {
     
     ///////////////LA FECHA DE RADIALES 
     let fecha = data.fecha;
-
+    let la_fecha_actualida = data.fecha || fecha_busqueda
     if (fecha) {
-      let la_fecha_actualida = await actualizarFechaEnParametrosQR(fecha);
+       la_fecha_actualida = await actualizarFechaEnParametrosQR(fecha);
       console.log('la fecha fue actualiz a', la_fecha_actualida);
     }
 
-
+return la_fecha_actualida
 
   } catch (ex) {
     console.error(ex);
@@ -662,6 +662,7 @@ export const syncSubestaciones = async (generatedToken) => {
 // console.log('fechas de subestaciones va',fecha_busqueda_subestacciones)
     
     let data2 = await fetchSubestacionesDataSync(generatedToken, fecha_busqueda_subestacciones);
+    let fecha_subetaciones = data2.fecha||fecha_busqueda_subestacciones;
     
     ///////////////LA SUBESTACIONES 
     let exito_insertar_subestacionnes = false;
@@ -675,12 +676,12 @@ export const syncSubestaciones = async (generatedToken) => {
       }
     }
     ///////////////LA FECHA DE SUBESTACIONES
-    let fecha_subetaciones = data2.fecha;
+    let la_fecha_actualida_subetaciones
     if (fecha_subetaciones && exito_insertar_subestacionnes) {
-      let la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
+       la_fecha_actualida_subetaciones = await actualizarFechaEnParametrosQRSubestaciones(fecha_subetaciones);
       // console.log('la fecha fue actualiz de subestaciones ', la_fecha_actualida_subetaciones);
     }
-
+    return fecha_subetaciones
 
   } catch (ex) {
     console.error(ex);
