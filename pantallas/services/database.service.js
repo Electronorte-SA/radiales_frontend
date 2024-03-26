@@ -140,8 +140,8 @@ export const initializeDatabase = () => {
     );
 
     // eliminarDatos();
-    contar();
-    contarsubestaciones();
+    //await contarRadiales();
+    //await contarsubestaciones();
   });
   
 };
@@ -227,7 +227,7 @@ export const handleDelete = () => {
     );
   });
 
-  contar();
+  contarRadiales();
 };
 //////////////////////////////////////////////////apisssssssssssssssss
 
@@ -766,43 +766,56 @@ export function handleSearchButton() {
   });
 }
 
-export const contar = () => {
-  db.transaction(tx => {
-    tx.executeSql(
-      'SELECT COUNT(*) AS count FROM radialesQR',
-      [],
+export const contarRadiales = () => {
+  return new Promise((resolve, reject)=>{
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT COUNT(*) AS count FROM radialesQR',
+        [],
+  
+        (_, result) => {
+          const rowCount = result.rows.item(0).count;
+  
+          console.log(
+            'Cantidad de uuuuuuuuu dato  ccccs insertados en la tabla radialesQR:',
+            rowCount,
+          );
+          resolve(rowCount)
+        },
+        (_, error) => {
+          reject(error)
+          console.error('Error al realizar la consulta:', error);
+        },
+      );
+    });
 
-      (_, result) => {
-        const rowCount = result.rows.item(0).count;
-        console.log(
-          'Cantidad de uuuuuuuuu dato  ccccs insertados en la tabla radialesQR:',
-          rowCount,
-        );
-      },
-      (_, error) => {
-        console.error('Error al realizar la consulta:', error);
-      },
-    );
-  });
+  })
+  
 };
 export const contarsubestaciones = () => {
-  db.transaction(tx => {
-    tx.executeSql(
-      'SELECT COUNT(*) AS count FROM subestaciones',
-      [],
+  return new Promise((resolve,reject)=>{
+    db.transaction(tx => {
+      tx.executeSql(
+        'SELECT COUNT(*) AS count FROM subestaciones',
+        [],
+  
+        (_, result) => {
+          const rowCount = result.rows.item(0).count;
+          console.log(
+            'Cantidad de uuuuuuuuu dato  ccccs insertados en subestaciones:',
+            rowCount,
+          );
+          resolve(rowCount)
+        },
+        (_, error) => {
+          console.error('Error al realizar la consulta subestaciones:', error);
+          reject(error)
+        },
+      );
+    });
 
-      (_, result) => {
-        const rowCount = result.rows.item(0).count;
-        console.log(
-          'Cantidad de uuuuuuuuu dato  ccccs insertados en subestaciones:',
-          rowCount,
-        );
-      },
-      (_, error) => {
-        console.error('Error al realizar la consulta subestaciones:', error);
-      },
-    );
-  });
+  })
+  
 };
 
 export const eliminarDatos = () => {

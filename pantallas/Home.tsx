@@ -22,33 +22,12 @@ import {Grayscale} from 'react-native-image-filter-kit';
 
 import Boton from '../Componentes/Boton';
 
-import {initializeDatabase,  syncRadiales, botonsubestaciones, syncSubestaciones, handleSyncSub, fetchToken, getLastUpdDateRdls, getLastUpdDateSubs} from './services/database.service';
+import {initializeDatabase,  syncRadiales, botonsubestaciones, syncSubestaciones, handleSyncSub, fetchToken, getLastUpdDateRdls, getLastUpdDateSubs, contarRadiales, contarsubestaciones} from './services/database.service';
 function Home({navigation}): JSX.Element {
   //const [loadedImage, setLoadedImage] = useState(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [dateRdl, setDateRdl] = useState<Date>()
-  const [dateSub, setDateSub] = useState<Date>()
-  // const requestCameraPermission = async () => {
-  //   try {
-  //     const granted = await PermissionsAndroid.request(
-  //       PermissionsAndroid.PERMISSIONS.CAMERA,
-  //       {
-  //         title: 'App Camera Permission',
-  //         message: 'App needs access to your camera',
-  //         buttonNeutral: 'Ask Me Later',
-  //         buttonNegative: 'Cancel',
-  //         buttonPositive: 'OK',
-  //       },
-  //     );
-  //     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //       console.log('Camera permission given');
-  //     } else {
-  //       console.log('Camera permission denied');
-  //     }
-  //   } catch (err) {
-  //     console.warn(err);
-  //   }
-  // };
+  const [numRdls, setNumRdls] = useState()
+  const [numSubs, setNumSubs] = useState()
 
   let inicializaCompletado = false;
   let syncSubCompleted = true;
@@ -59,33 +38,8 @@ function Home({navigation}): JSX.Element {
       await initializeDatabase(); 
       inicializaCompletado = true;
     }
-    let lastUpdSubs:Date;
-    let lastUpdRdls:Date;
-
-    const getLastUpdate = async()=>{
-      try{
-        Alert.alert('Obtiene fechas')
-        lastUpdSubs = await getLastUpdDateSubs()
-        Alert.alert('Las Subs', lastUpdSubs)
-        setDateSub(lastUpdSubs)
-        lastUpdRdls =  await getLastUpdDateRdls()
-        setDateRdl(lastUpdRdls)
-        if (lastUpdSubs || lastUpdRdls)
-        {
-          inicializaCompletado = true
-          Alert.alert(
-            'Fechas', lastUpdRdls, lastUpdSubs
-          );
-          console.log('inicio realizado')
-        }
-      }
-      catch(ex){
-        Alert.alert('Fallo al obtener fechas', ex)
-        throw ex;
-        
-      }
     
-    }
+
     const isInternetAvailable = async ()=>{
       try {
         const response = await fetch('https://radialesqr.azurewebsites.net');
@@ -95,7 +49,8 @@ function Home({navigation}): JSX.Element {
         return true
       } catch (error) { 
         // si nunca se ha sincronizado comunica el error
-        if(!lastUpdSubs || !lastUpdRdls) { 
+        const radiales = await contarRadiales();
+        if(!radiales||radiales==0) { 
         Alert.alert(
           'Fallo en la conexion al internet' + error
         );
@@ -105,6 +60,16 @@ function Home({navigation}): JSX.Element {
         
 
       
+    }
+    const getRowsTables = async ()=>{
+      const radiales = await contarRadiales();
+      console.log('radiales', radiales)
+      const subEstaciones = await contarsubestaciones();
+      console.log('subs', subEstaciones)
+      if (radiales>0)
+        setNumRdls(radiales)
+      if (subEstaciones>0)
+        setNumSubs(subEstaciones) 
     }
     const syncRdls = async () => {
       try {
@@ -116,16 +81,13 @@ function Home({navigation}): JSX.Element {
           let fecha = await syncRadiales(generatedToken);
           console.log('fecha rdl', fecha)
           syncRdlCompleted = true;
-          if (fecha){
-            setDateRdl(fecha)
-          }
-
+          
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
         
       } catch (error) { 
         syncRdlCompleted = true
         
-        if(!lastUpdRdls) { 
+        if(!numRdls) { 
         Alert.alert(
           'Fallo en la conexion al internet' + error
         );
@@ -136,24 +98,17 @@ function Home({navigation}): JSX.Element {
 
     const syncSubs = async () => {
       try {
-        syncSubCompleted = false
           let generatedToken = await fetchToken();
           setLoading(true);
           // Inicia la carga de las funciones
          
           let fecha = await syncSubestaciones(generatedToken);
-          console.log('fecha sub', fecha)
-          syncSubCompleted = true;
-          if (fecha){
-
-            setDateSub(fecha)
-          }
+          
           setLoading(false); // Oculta  la animación después de que las funciones hayan terminado
           
         } catch(err) { 
-          syncSubCompleted = true
           Alert.alert(
-            'Fallo en la conexion al servicio',
+            'Fallo en el proceso de sincronizacion',
           );
           setLoading(false);
         }
@@ -167,17 +122,13 @@ function Home({navigation}): JSX.Element {
           if (inicializaCompletado)
           {
             //await getLastUpdate()  
-            
+             await getRowsTables() 
             if (await isInternetAvailable()){
               syncRdls();
               syncSubs();
             }
           }
-        
-        
-        
-
-      
+             
       }catch(ex){
         Alert.alert('Fallo', ex.message)
       }
@@ -186,27 +137,8 @@ function Home({navigation}): JSX.Element {
     procesar()
 
     
-
-    // const timeoutSyncRdl = setInterval(async () => {
-    //   // Comprueba si las funciones han completado antes  de ejecutar handleSync
-    //   const internetAvailable = await isInternetAvailable()
-    //   if (inicializaCompletado && syncRdlCompleted && internetAvailable) {
-    //     syncRdls();
-    //   }
-    // }, 10000);
-
-    // const timeoutSyncSub = setInterval(async () => {
-    //   // Comprueba si las funciones han completado antes  de ejecutar handleSync
-    //   const internetAvailable = await isInternetAvailable()
-    //   if (inicializaCompletado && syncSubCompleted && internetAvailable) {
-    //     syncSubs();
-    //   }
-    // }, 500000);
-
     return () => {
-      //clearInterval(timeoutSyncRdl);
-      //clearInterval(timeoutSyncSub);
-      setLoading(false);
+          setLoading(false);
     };
   }, []);
 
@@ -293,17 +225,17 @@ function Home({navigation}): JSX.Element {
                 </View>
               ) : (
                 <View>
-                  {dateRdl &&<Boton
+                  {numRdls &&<Boton
                     text="SCAN QR"
                     onPress={() => {
                       navigation.push('Camara');
                     }} />}
-                  {dateRdl && <Boton
+                  {numRdls && <Boton
                     text="BUSCAR RDL"
                     onPress={() => navigation.push('buscar_rdl')}
                     />}
               
-                     {dateSub && <Boton
+                     {numSubs && <Boton
                     text="BUSCAR SUB"
                     onPress={() => navigation.push('Buscar_Sub')}
                     />}
